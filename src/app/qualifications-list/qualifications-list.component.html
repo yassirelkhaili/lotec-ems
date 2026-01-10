@@ -1,47 +1,33 @@
 <div class="qualifications-container">
   <header class="page-header">
-    <h1>Qualifications Management</h1>
-    <button class="btn btn-primary" (click)="showCreateForm()" *ngIf="!showForm">
-      <span class="icon">+</span> Add New Qualification
-    </button>
+    <h1 class="page-title">Qualifikationsübersicht🎓</h1>
+    <p class="page-description">
+      Alle Mitarbeiterqualifikationen hier ansehen und verwalten.
+    </p>
   </header>
-
-  <!-- Create/Edit Form -->
-  <div class="form-container" *ngIf="showForm">
-    <div class="form-card">
-      <h2>{{ isEditMode ? 'Edit Qualification' : 'Create New Qualification' }}</h2>
-      
-      <form (ngSubmit)="onSubmit()">
-        <div class="form-group">
-          <label for="designation">Designation *</label>
-          <input 
-            type="text" 
-            id="designation" 
-            name="designation"
-            [(ngModel)]="qualificationForm.designation"
-            placeholder="e.g., Java Developer, Project Manager"
-            required
-            class="form-input"
-          />
-        </div>
-
-        <div class="form-actions">
-          <button type="submit" class="btn btn-success">
-            {{ isEditMode ? 'Update' : 'Create' }}
-          </button>
-          <button type="button" class="btn btn-secondary" (click)="cancelForm()">
-            Cancel
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
 
   <!-- Qualifications List -->
   <div class="qualifications-list">
     <div class="list-header">
-      <h2>All Qualifications</h2>
-      <p class="list-count">Total: {{ qualifications.length }}</p>
+      <div class="list-search">
+        <input
+          type="text"
+          class="list-search-input"
+          placeholder="Suche nach Bezeichnung"
+        />
+        <button class="list-search-button" type="button">
+          <img
+            class="list-search-icon"
+            src="/MagnifyingGlass.webp"
+            alt="search"
+          />
+        </button>
+      </div>
+      <button
+        class="btn btn-primary"
+      >
+        <span class="icon">+</span> Neue Qualifikation
+      </button>
     </div>
 
     <!-- Loading State -->
@@ -50,7 +36,10 @@
     </div>
 
     <!-- Empty State -->
-    <div *ngIf="qualifications.length === 0 && (qualifications$ | async) !== null" class="empty-state">
+    <div
+      *ngIf="qualifications.length === 0 && (qualifications$ | async) !== null"
+      class="empty-state"
+    >
       <p>No qualifications found.</p>
       <button class="btn btn-primary" (click)="showCreateForm()">
         Create your first qualification
@@ -59,8 +48,8 @@
 
     <!-- Qualifications Grid -->
     <div class="qualifications-grid" *ngIf="qualifications.length > 0">
-      <div 
-        *ngFor="let qualification of qualifications$ | async" 
+      <div
+        *ngFor="let qualification of qualifications$ | async"
         class="qualification-card"
       >
         <div class="card-header">
@@ -69,24 +58,24 @@
         </div>
 
         <div class="card-actions">
-          <button 
-            class="btn btn-sm btn-info" 
+          <button
+            class="btn btn-sm btn-info"
             (click)="viewEmployees(qualification.id)"
             title="View employees with this qualification"
           >
             <span class="icon">👥</span> View Employees
           </button>
-          
-          <button 
-            class="btn btn-sm btn-warning" 
+
+          <button
+            class="btn btn-sm btn-warning"
             (click)="editQualification(qualification)"
             title="Edit qualification"
           >
             <span class="icon">✏️</span> Edit
           </button>
-          
-          <button 
-            class="btn btn-sm btn-danger" 
+
+          <button
+            class="btn btn-sm btn-danger"
             (click)="deleteQualification(qualification.id)"
             title="Delete qualification"
           >
