@@ -13,9 +13,9 @@ describe('QualificationsListComponent', () => {
   let httpMock: HttpTestingController;
 
   const mockQualifications: Qualification[] = [
-    { id: 1, designation: 'Java Developer' },
-    { id: 2, designation: 'Project Manager' },
-    { id: 3, designation: 'Scrum Master' },
+    { id: 1, skill: 'Java Developer' },
+    { id: 2, skill: 'Project Manager' },
+    { id: 3, skill: 'Scrum Master' },
   ];
 
   beforeEach(async () => {
@@ -60,7 +60,7 @@ describe('QualificationsListComponent', () => {
 
     expect(component.showForm).toBe(true);
     expect(component.isEditMode).toBe(false);
-    expect(component.qualificationForm.designation).toBe('');
+    expect(component.qualificationForm.skill).toBe('');
   });
 
   it('should show edit form with qualification data when editQualification is called', () => {
@@ -71,34 +71,34 @@ describe('QualificationsListComponent', () => {
     expect(component.showForm).toBe(true);
     expect(component.isEditMode).toBe(true);
     expect(component.selectedQualification).toEqual(qualification);
-    expect(component.qualificationForm.designation).toBe(
-      qualification.designation
+    expect(component.qualificationForm.skill).toBe(
+      qualification.skill
     );
   });
 
   it('should cancel form and reset data when cancelForm is called', () => {
     component.showForm = true;
     component.isEditMode = true;
-    component.qualificationForm.designation = 'Test';
+    component.qualificationForm.skill = 'Test';
 
     component.cancelForm();
 
     expect(component.showForm).toBe(false);
     expect(component.selectedQualification).toBeNull();
-    expect(component.qualificationForm.designation).toBe('');
+    expect(component.qualificationForm.skill).toBe('');
   });
 
   it('should create a new qualification', () => {
-    component.qualificationForm.designation = 'Backend Developer';
+    component.qualificationForm.skill = 'Backend Developer';
     component.createQualification();
 
     const req = httpMock.expectOne('http://localhost:8089/qualifications');
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({ designation: 'Backend Developer' });
+    expect(req.request.body).toEqual({ skill: 'Backend Developer' });
     expect(req.request.headers.get('Authorization')).toContain('Bearer');
     expect(req.request.headers.get('Content-Type')).toBe('application/json');
 
-    req.flush({ id: 4, designation: 'Backend Developer' });
+    req.flush({ id: 4, skill: 'Backend Developer' });
 
     // Should reload qualifications after creation
     const getReq = httpMock.expectOne('http://localhost:8089/qualifications');
@@ -106,13 +106,13 @@ describe('QualificationsListComponent', () => {
     getReq.flush(mockQualifications);
   });
 
-  it('should not create qualification with empty designation', () => {
+  it('should not create qualification with empty skill', () => {
     spyOn(window, 'alert');
-    component.qualificationForm.designation = '   ';
+    component.qualificationForm.skill = '   ';
 
     component.createQualification();
 
-    expect(window.alert).toHaveBeenCalledWith('Please enter a designation');
+    expect(window.alert).toHaveBeenCalledWith('Please enter a skill');
     httpMock.expectNone('http://localhost:8089/qualifications');
   });
 
@@ -120,7 +120,7 @@ describe('QualificationsListComponent', () => {
     component.selectedQualification = mockQualifications[0];
     component.qualificationForm = {
       id: 1,
-      designation: 'Senior Java Developer',
+      skill: 'Senior Java Developer',
     };
     component.isEditMode = true;
 
@@ -130,11 +130,11 @@ describe('QualificationsListComponent', () => {
     expect(req.request.method).toBe('PUT');
     expect(req.request.body).toEqual({
       id: 1,
-      designation: 'Senior Java Developer',
+      skill: 'Senior Java Developer',
     });
     expect(req.request.headers.get('Authorization')).toContain('Bearer');
 
-    req.flush({ id: 1, designation: 'Senior Java Developer' });
+    req.flush({ id: 1, skill: 'Senior Java Developer' });
 
     // Should reload qualifications after update
     const getReq = httpMock.expectOne('http://localhost:8089/qualifications');
@@ -186,7 +186,7 @@ describe('QualificationsListComponent', () => {
 
   it('should submit form in create mode', () => {
     component.isEditMode = false;
-    component.qualificationForm.designation = 'Test Qualification';
+    component.qualificationForm.skill = 'Test Qualification';
 
     spyOn(component, 'createQualification');
     component.onSubmit();
@@ -199,7 +199,7 @@ describe('QualificationsListComponent', () => {
     component.selectedQualification = mockQualifications[0];
     component.qualificationForm = {
       id: 1,
-      designation: 'Updated Qualification',
+      skill: 'Updated Qualification',
     };
 
     spyOn(component, 'updateQualification');
@@ -230,7 +230,7 @@ describe('QualificationsListComponent', () => {
     spyOn(console, 'error');
     spyOn(window, 'alert');
 
-    component.qualificationForm.designation = 'Test';
+    component.qualificationForm.skill = 'Test';
     component.createQualification();
 
     const req = httpMock.expectOne('http://localhost:8089/qualifications');

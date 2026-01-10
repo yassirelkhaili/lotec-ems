@@ -20,7 +20,7 @@ export class QualificationsListComponent implements OnInit {
   selectedQualification: Qualification | null = null;
   qualificationForm = {
     id: 0,
-    designation: '',
+    skill: '',
   };
 
   isEditMode = false;
@@ -29,7 +29,7 @@ export class QualificationsListComponent implements OnInit {
   // TODO: Replace with AuthService when ready
   // For now: Get token from getBearerToken.http
   private TEMP_TOKEN =
-    'eyJhbGciOiJSUzI1NiIsImtpZCI6ImM0MDc3MzdjMTg1MzQyYTk5Y2VlYzcyMTQwM2I4NjViIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkwMDAvYXBwbGljYXRpb24vby9lbXBsb3llZV9hcGkvIiwic3ViIjoiYjBlMDExYmU0Y2VlYzliOTYwNzA0MDY3ODU0OWJmNzA4M2I5ZjAwNGQ2MGQ2MTU5NTAwNjIwOWYyMmY5NmY1ZCIsImF1ZCI6ImVtcGxveWVlX2FwaV9jbGllbnQiLCJleHAiOjE3NjgwNjYxNjcsImlhdCI6MTc2ODA2MzE2NywiYXV0aF90aW1lIjoxNzY4MDYzMTY3LCJhY3IiOiJnb2F1dGhlbnRpay5pby9wcm92aWRlcnMvb2F1dGgyL2RlZmF1bHQiLCJhenAiOiJlbXBsb3llZV9hcGlfY2xpZW50IiwidWlkIjoiUnZnNFhxYVYyVW9tVEdvckhDUmhpNlRZdzhMUnNoMjJ3ZVVzQ29MRSJ9.Ls-ZMlVytkkqyZ2T-I5ddctvZ1Am_lzbqfWv3AtpdBgtE9-wOyApV-pks4rNvfups9Q5E_qlnFOUcYOjf8GfORWasa6gvvl1Bvu_EXcixomLVzvvfQUf4QubV872kJPRHZK0p7BOsm1Z5HQjFN-4VNFhRqvaBrZpY43qvn0kl1HGOJvMGawkcCIFIdiEQoJuns6rBajMs0wNyfjiZ-I2Gi9h8CCejQUS1ix0TRA8VK227XQTwDQXtYT8rSgAD7fgeOz9tY63RqnyRlbLSjEmG0bJeimjowsiLLx_0ku3Xs5J4IoqAPEmjNBR8I6QQ1SsPSKfxABBn9i4oNV8-h15owACC4_o8R0i135XCiI8wX-jzRCcWc6pDOx5dwCggRYIPw05KlYJGEFE4yPUmKtrxmAxs6tsyGrthKTEEtkrSwqt5PeabgrwFcY9-MTa5St47NjmEkaedH83oSwKKOZ_7H-f2inytDSOjCAEGak3ZlJ_xO_Sv07DqkUhy_UUYTqNzP8VpvmCIebXXAwd8BaAQbeHyuLzBKNdbLH07M0jv2IEvxumFPmGDDoZaVUWMHNFEhQGHvMQqS-bqu2fHiraJXO0pqjgdKVLX_-zsGs0ObxRfKjngZBsF_1e-uvm2y9ev7XNYx-V4yGhH8d9bOcJiFO7wz30-bnYeqZw5BZRxyg';
+    'eyJhbGciOiJSUzI1NiIsImtpZCI6ImM0MDc3MzdjMTg1MzQyYTk5Y2VlYzcyMTQwM2I4NjViIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkwMDAvYXBwbGljYXRpb24vby9lbXBsb3llZV9hcGkvIiwic3ViIjoiYjBlMDExYmU0Y2VlYzliOTYwNzA0MDY3ODU0OWJmNzA4M2I5ZjAwNGQ2MGQ2MTU5NTAwNjIwOWYyMmY5NmY1ZCIsImF1ZCI6ImVtcGxveWVlX2FwaV9jbGllbnQiLCJleHAiOjE3NjgwODM1MDYsImlhdCI6MTc2ODA4MDUwNiwiYXV0aF90aW1lIjoxNzY4MDgwNTA2LCJhY3IiOiJnb2F1dGhlbnRpay5pby9wcm92aWRlcnMvb2F1dGgyL2RlZmF1bHQiLCJhenAiOiJlbXBsb3llZV9hcGlfY2xpZW50IiwidWlkIjoiOHU3NGd1SDBjbkthWHhCbVBXaGNxcktnWFpMaDE3SWR4N1V2dzlkMiJ9.OGM5cOBEiiLLR4qp0D2FTGbfhKjo30dZFfxIhoG9DlCaJRWvD7hLZMhV7reRMC0iddi_YzraZqHzoYYqB3OWujvFmbPzeUZ_U24qtkdC0dA9AvFc6DmB-4sOuk0RPHpRky44h2KccquenkYbKRR4M2XIDcOD4mnIkAa573-Lzhupci1GpqaFoa7_As4JaMfp8ddpyU-mlUX-Sv7CUQfq-XJT9Q9PbqYpFXTa-CkD_pZBXU2lT9hnVlNgEHMBNhO9_GqlAhOs6MMjeR6hBktytPhZqd3jeF3CJxyzx3lGeqmPyutvkzjvmOFNUjgh5lDhuQnaengLn5atZiAFcUs7N38hvhGKPSZow0CIcpgad7dvh3OVzogEiIRAyu-_QWYkZTfF9mgWdf5qJjLyAD4CWRSRUo9HyotL-bjIsJMeDXZcVRq4nWkrX34cY00GDrYbfav1vISSZbIAjsWNASIMlhmCEzPqTPv0_EF3wA89tTBF7T9od03GTBc_GdugttziQx57NpUhoUoUobLx8T_4nt_XsWEIOHvnUVrjy4oPp1Osul9TRvsDhZm8fprorM_w_AU1EDi2sU-ZH-VehuIl0rvd6ZC6grV7Dirjyi-isw-Bny4Q1-CPxFFWfJkmaMOkCbd-akw8eSsKvxl3q5jMAJlHbv2sj4FDm2uue_yPIb8';
 
   private apiUrl = 'http://localhost:8089/qualifications';
 
@@ -72,7 +72,7 @@ export class QualificationsListComponent implements OnInit {
     this.showForm = true;
     this.qualificationForm = {
       id: 0,
-      designation: '',
+      skill: '',
     };
   }
 
@@ -85,7 +85,7 @@ export class QualificationsListComponent implements OnInit {
     this.selectedQualification = qualification;
     this.qualificationForm = {
       id: qualification.id,
-      designation: qualification.designation,
+      skill: qualification.skill,
     };
   }
 
@@ -97,7 +97,7 @@ export class QualificationsListComponent implements OnInit {
     this.selectedQualification = null;
     this.qualificationForm = {
       id: 0,
-      designation: '',
+      skill: '',
     };
   }
 
@@ -105,13 +105,13 @@ export class QualificationsListComponent implements OnInit {
    * Create new qualification
    */
   createQualification(): void {
-    if (!this.qualificationForm.designation.trim()) {
-      alert('Please enter a designation');
+    if (!this.qualificationForm.skill.trim()) {
+      alert('Please enter a skill');
       return;
     }
 
     const newQualification = {
-      designation: this.qualificationForm.designation,
+      skill: this.qualificationForm.skill,
     };
 
     this.http
@@ -137,8 +137,8 @@ export class QualificationsListComponent implements OnInit {
    * Update existing qualification
    */
   updateQualification(): void {
-    if (!this.qualificationForm.designation.trim()) {
-      alert('Please enter a designation');
+    if (!this.qualificationForm.skill.trim()) {
+      alert('Please enter a skill');
       return;
     }
 
@@ -148,7 +148,7 @@ export class QualificationsListComponent implements OnInit {
 
     const updatedQualification = {
       id: this.qualificationForm.id,
-      designation: this.qualificationForm.designation,
+      skill: this.qualificationForm.skill,
     };
 
     this.http

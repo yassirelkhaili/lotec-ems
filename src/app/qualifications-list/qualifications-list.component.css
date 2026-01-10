@@ -5,6 +5,12 @@
   padding: 2rem;
 }
 
+.qualifications-list {
+  display: flex;
+  gap: 2rem;
+  flex-direction: column;
+}
+
 /* Page Header */
 .page-header {
   display: flex;
@@ -25,15 +31,15 @@
 
 .page-description {
   color: var(--text-secondary);
-  font: var(--font-secondary);
+  font-family: var(--font-secondary);
   font-size: 16px;
 }
 
 /* Search Container */
 .list-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .list-search {
@@ -79,7 +85,7 @@
 .list-search-icon {
   width: 20px;
   height: 20px;
-  filter: brightness(0) invert(1); /* Makes icon white */
+  filter: brightness(0) invert(1);
 }
 
 /* Buttons */
@@ -100,7 +106,7 @@
 
 .btn-primary {
   background-color: var(--background-secondary);
-  color: white;
+  color: var(--text-primary);
 }
 
 .btn-primary:hover {
@@ -109,7 +115,7 @@
 
 .btn-success {
   background-color: #2196f3;
-  color: white;
+  color: var(--text-primary);
 }
 
 .btn-success:hover {
@@ -118,7 +124,7 @@
 
 .btn-secondary {
   background-color: #757575;
-  color: white;
+  color: var(--text-primary);
 }
 
 .btn-secondary:hover {
@@ -127,7 +133,7 @@
 
 .btn-warning {
   background-color: #ff9800;
-  color: white;
+  color: var(--text-primary);
 }
 
 .btn-warning:hover {
@@ -136,7 +142,7 @@
 
 .btn-danger {
   background-color: #f44336;
-  color: white;
+  color: var(--text-primary);
 }
 
 .btn-danger:hover {
@@ -145,7 +151,7 @@
 
 .btn-info {
   background-color: #2196f3;
-  color: white;
+  color: var(--text-primary);
 }
 
 .btn-info:hover {
@@ -155,4 +161,95 @@
 .btn-sm {
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
+}
+
+.loading-text {
+  color: var(--text-primary);
+  font-family: var(--font-primary);
+}
+
+/* Table Styles */
+.qualifications-table {
+  width: auto;
+  border-collapse: collapse;
+  background: var(--text-primary);
+  overflow: hidden;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.qualifications-table thead {
+  background-color: var(--background-secondary);
+}
+.table-wrapper {
+  display: inline-block;
+}
+
+.qualifications-table th {
+  padding: 1rem;
+  text-align: center;
+  font-weight: 600;
+  font-family: var(--font-primary);
+  color: var(--text-primary);
+  background-color: var(--background-secondary);
+  border: none;
+}
+
+.qualifications-table tbody tr:nth-child(odd) {
+  background-color: var(--row-odd);
+}
+
+.qualifications-table tbody tr:nth-child(even) {
+  background-color: var(--row-even);
+}
+
+.qualifications-table tbody tr {
+  transition: opacity 0.2s;
+}
+
+.qualifications-table tbody tr:hover {
+  opacity: 0.8;
+}
+
+.qualifications-table td {
+  padding: 1rem;
+  color: var(--text-black);
+  font-family: var(--font-primary);
+  border: none;
+  text-align: center;
+}
+
+.qualifications-table td:first-child {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-link {
+  background: none;
+  color: #2196f3;
+  padding: 0.25rem 0.5rem;
+  border: none;
+}
+
+.btn-link:hover {
+  background: rgba(33, 150, 243, 0.1);
+  transform: none;
+}
+
+.action-icon {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  height: 26px;
+  width: 36px;
 }

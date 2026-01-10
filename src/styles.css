@@ -3,8 +3,11 @@
 :root {
   --text-primary: #ffffff;
   --text-secondary: #a6a6a6;
+  --text-black: #000000;
   --background-primary: #1e1d3f;
-  --background-secondary: #E27800;
+  --background-secondary: #e27800;
+  --row-odd: #f3f8ff;
+  --row-even: #ffffff;
   --background-secondary-hover: rgb(199, 106, 0);
   --font-primary: "Roboto", sans-serif;
   --font-secondary: "Inter", sans-serif;

@@ -5,7 +5,6 @@
       Alle Mitarbeiterqualifikationen hier ansehen und verwalten.
     </p>
   </header>
-
   <!-- Qualifications List -->
   <div class="qualifications-list">
     <div class="list-header">
@@ -23,18 +22,14 @@
           />
         </button>
       </div>
-      <button
-        class="btn btn-primary"
-      >
+      <button class="btn btn-primary">
         <span class="icon">+</span> Neue Qualifikation
       </button>
     </div>
-
     <!-- Loading State -->
     <div *ngIf="(qualifications$ | async) === null" class="loading">
-      <p>Loading qualifications...</p>
+      <p class="loading-text">Loading qualifications...</p>
     </div>
-
     <!-- Empty State -->
     <div
       *ngIf="qualifications.length === 0 && (qualifications$ | async) !== null"
@@ -45,44 +40,45 @@
         Create your first qualification
       </button>
     </div>
-
-    <!-- Qualifications Grid -->
-    <div class="qualifications-grid" *ngIf="qualifications.length > 0">
-      <div
-        *ngFor="let qualification of qualifications$ | async"
-        class="qualification-card"
-      >
-        <div class="card-header">
-          <h3>{{ qualification.designation }}</h3>
-          <span class="badge">ID: {{ qualification.id }}</span>
-        </div>
-
-        <div class="card-actions">
-          <button
-            class="btn btn-sm btn-info"
-            (click)="viewEmployees(qualification.id)"
-            title="View employees with this qualification"
-          >
-            <span class="icon">👥</span> View Employees
-          </button>
-
-          <button
-            class="btn btn-sm btn-warning"
-            (click)="editQualification(qualification)"
-            title="Edit qualification"
-          >
-            <span class="icon">✏️</span> Edit
-          </button>
-
-          <button
-            class="btn btn-sm btn-danger"
-            (click)="deleteQualification(qualification.id)"
-            title="Delete qualification"
-          >
-            <span class="icon">🗑️</span> Delete
-          </button>
-        </div>
-      </div>
-    </div>
+    <!-- Qualifications Table -->
+    <table class="qualifications-table" *ngIf="qualifications.length > 0">
+      <thead>
+        <tr>
+          <th>Bezeichnung</th>
+          <th>Mitarbeiter</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let qualification of qualifications$ | async">
+          <td>{{ qualification.skill }}</td>
+          <td></td>
+          <td class="actions-cell">
+            <button
+              class="action-icon"
+              (click)="viewEmployees(qualification.id)"
+              title="View employees with this qualification"
+            >
+              <img src="/eye.webp" alt="edit" class="trash-icon" />
+            </button>
+            <button
+              class="action-icon"
+              (click)="editQualification(qualification)"
+              title="Edit qualification"
+            >
+              <img src="/PencilSimpleLine.webp" alt="edit" class="edit-icon" />
+            </button>
+            <button
+              class="action-icon"
+              (click)="deleteQualification(qualification.id)"
+              title="Delete qualification"
+            >
+              <img src="/Trash.webp" alt="edit" class="trash-icon" />
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span class="page-description">{{ qualifications.length }} Einträge</span>
   </div>
 </div>
