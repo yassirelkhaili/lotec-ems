@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, of } from "rxjs";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { Employee } from "../Employee";
+import { Employee } from "../types/Employee";
 
 @Component({
   selector: 'app-employee-list',
