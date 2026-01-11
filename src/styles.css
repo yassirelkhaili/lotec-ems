@@ -1,1 +1,26 @@
-/* You can add global styles to this file, and also import other style files */
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
+
+:root {
+  --text-primary: #ffffff;
+  --text-secondary: #a6a6a6;
+  --text-black: #000000;
+  --background-primary: #1e1d3f;
+  --background-secondary: #e27800;
+  --row-odd: #f3f8ff;
+  --row-even: #ffffff;
+  --background-secondary-hover: rgb(199, 106, 0);
+  --font-primary: "Roboto", sans-serif;
+  --font-secondary: "Inter", sans-serif;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--background-primary);
+}

@@ -1,11 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
-  HttpClientTestingModule,
   HttpTestingController,
+  provideHttpClientTesting,
 } from '@angular/common/http/testing';
-import { FormsModule } from '@angular/forms';
+import { provideHttpClient } from '@angular/common/http';
+import { ReactiveFormsModule } from '@angular/forms';
 import { QualificationsListComponent } from './qualifications-list.component';
 import { Qualification } from '../types/Qualification';
+import { QualificationEmployeesResponse } from '../types/QualificationEmployeeResponse';
 
 describe('QualificationsListComponent', () => {
   let component: QualificationsListComponent;
@@ -13,18 +15,23 @@ describe('QualificationsListComponent', () => {
   let httpMock: HttpTestingController;
 
   const mockQualifications: Qualification[] = [
-    { id: 1, designation: 'Java Developer' },
-    { id: 2, designation: 'Project Manager' },
-    { id: 3, designation: 'Scrum Master' },
+    { id: 1, skill: 'Java Developer' },
+    { id: 2, skill: 'Project Manager' },
+    { id: 3, skill: 'Scrum Master' },
   ];
+
+  const mockEmployeesResponse: QualificationEmployeesResponse = {
+    qualification: { id: 1, skill: 'Java Developer' },
+    employees: [
+      { id: 1, firstName: 'John', lastName: 'Doe' },
+      { id: 2, firstName: 'Jane', lastName: 'Smith' },
+    ],
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        QualificationsListComponent,
-        HttpClientTestingModule,
-        FormsModule,
-      ],
+      imports: [QualificationsListComponent, ReactiveFormsModule],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(QualificationsListComponent);
@@ -49,18 +56,15 @@ describe('QualificationsListComponent', () => {
 
     req.flush(mockQualifications);
 
-    component.qualifications$.subscribe((qualifications) => {
-      expect(qualifications.length).toBe(3);
-      expect(qualifications).toEqual(mockQualifications);
-    });
+    expect(component.qualifications()).toEqual(mockQualifications);
   });
 
   it('should show create form when showCreateForm is called', () => {
     component.showCreateForm();
 
-    expect(component.showForm).toBe(true);
-    expect(component.isEditMode).toBe(false);
-    expect(component.qualificationForm.designation).toBe('');
+    expect(component.showForm()).toBe(true);
+    expect(component.isEditMode()).toBe(false);
+    expect(component.qualificationForm.value.skill).toBe('');
   });
 
   it('should show edit form with qualification data when editQualification is called', () => {
@@ -68,37 +72,35 @@ describe('QualificationsListComponent', () => {
 
     component.editQualification(qualification);
 
-    expect(component.showForm).toBe(true);
-    expect(component.isEditMode).toBe(true);
-    expect(component.selectedQualification).toEqual(qualification);
-    expect(component.qualificationForm.designation).toBe(
-      qualification.designation
-    );
+    expect(component.showForm()).toBe(true);
+    expect(component.isEditMode()).toBe(true);
+    expect(component.selectedQualification()).toEqual(qualification);
+    expect(component.qualificationForm.value.skill).toBe(qualification.skill);
   });
 
   it('should cancel form and reset data when cancelForm is called', () => {
-    component.showForm = true;
-    component.isEditMode = true;
-    component.qualificationForm.designation = 'Test';
+    component.showForm.set(true);
+    component.isEditMode.set(true);
+    component.qualificationForm.patchValue({ skill: 'Test' });
 
     component.cancelForm();
 
-    expect(component.showForm).toBe(false);
-    expect(component.selectedQualification).toBeNull();
-    expect(component.qualificationForm.designation).toBe('');
+    expect(component.showForm()).toBe(false);
+    expect(component.selectedQualification()).toBeNull();
+    expect(component.qualificationForm.value.skill).toBe('');
   });
 
   it('should create a new qualification', () => {
-    component.qualificationForm.designation = 'Backend Developer';
+    component.qualificationForm.patchValue({ skill: 'Backend Developer' });
     component.createQualification();
 
     const req = httpMock.expectOne('http://localhost:8089/qualifications');
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({ designation: 'Backend Developer' });
+    expect(req.request.body).toEqual({ skill: 'Backend Developer' });
     expect(req.request.headers.get('Authorization')).toContain('Bearer');
     expect(req.request.headers.get('Content-Type')).toBe('application/json');
 
-    req.flush({ id: 4, designation: 'Backend Developer' });
+    req.flush({ id: 4, skill: 'Backend Developer' });
 
     // Should reload qualifications after creation
     const getReq = httpMock.expectOne('http://localhost:8089/qualifications');
@@ -106,35 +108,31 @@ describe('QualificationsListComponent', () => {
     getReq.flush(mockQualifications);
   });
 
-  it('should not create qualification with empty designation', () => {
-    spyOn(window, 'alert');
-    component.qualificationForm.designation = '   ';
+  it('should not create qualification with empty skill', () => {
+    component.qualificationForm.patchValue({ skill: '' });
 
     component.createQualification();
 
-    expect(window.alert).toHaveBeenCalledWith('Please enter a designation');
+    // Form is invalid, so no HTTP request should be made
     httpMock.expectNone('http://localhost:8089/qualifications');
   });
 
   it('should update an existing qualification', () => {
-    component.selectedQualification = mockQualifications[0];
-    component.qualificationForm = {
+    component.selectedQualification.set(mockQualifications[0]);
+    component.qualificationForm.patchValue({
       id: 1,
-      designation: 'Senior Java Developer',
-    };
-    component.isEditMode = true;
+      skill: 'Senior Java Developer',
+    });
+    component.isEditMode.set(true);
 
     component.updateQualification();
 
     const req = httpMock.expectOne('http://localhost:8089/qualifications/1');
     expect(req.request.method).toBe('PUT');
-    expect(req.request.body).toEqual({
-      id: 1,
-      designation: 'Senior Java Developer',
-    });
+    expect(req.request.body.skill).toBe('Senior Java Developer');
     expect(req.request.headers.get('Authorization')).toContain('Bearer');
 
-    req.flush({ id: 1, designation: 'Senior Java Developer' });
+    req.flush({ id: 1, skill: 'Senior Java Developer' });
 
     // Should reload qualifications after update
     const getReq = httpMock.expectOne('http://localhost:8089/qualifications');
@@ -168,11 +166,6 @@ describe('QualificationsListComponent', () => {
   });
 
   it('should load employees for a qualification', () => {
-    const mockEmployees = [
-      { id: 1, firstName: 'John', lastName: 'Doe' },
-      { id: 2, firstName: 'Jane', lastName: 'Smith' },
-    ];
-
     component.viewEmployees(1);
 
     const req = httpMock.expectOne(
@@ -181,12 +174,12 @@ describe('QualificationsListComponent', () => {
     expect(req.request.method).toBe('GET');
     expect(req.request.headers.get('Authorization')).toContain('Bearer');
 
-    req.flush(mockEmployees);
+    req.flush(mockEmployeesResponse);
   });
 
   it('should submit form in create mode', () => {
-    component.isEditMode = false;
-    component.qualificationForm.designation = 'Test Qualification';
+    component.isEditMode.set(false);
+    component.qualificationForm.patchValue({ skill: 'Test Qualification' });
 
     spyOn(component, 'createQualification');
     component.onSubmit();
@@ -195,12 +188,12 @@ describe('QualificationsListComponent', () => {
   });
 
   it('should submit form in edit mode', () => {
-    component.isEditMode = true;
-    component.selectedQualification = mockQualifications[0];
-    component.qualificationForm = {
+    component.isEditMode.set(true);
+    component.selectedQualification.set(mockQualifications[0]);
+    component.qualificationForm.patchValue({
       id: 1,
-      designation: 'Updated Qualification',
-    };
+      skill: 'Updated Qualification',
+    });
 
     spyOn(component, 'updateQualification');
     component.onSubmit();
@@ -230,7 +223,7 @@ describe('QualificationsListComponent', () => {
     spyOn(console, 'error');
     spyOn(window, 'alert');
 
-    component.qualificationForm.designation = 'Test';
+    component.qualificationForm.patchValue({ skill: 'Test' });
     component.createQualification();
 
     const req = httpMock.expectOne('http://localhost:8089/qualifications');
@@ -243,5 +236,53 @@ describe('QualificationsListComponent', () => {
     expect(window.alert).toHaveBeenCalledWith(
       'Failed to create qualification. Check console for details.'
     );
+  });
+
+  it('should filter qualifications based on search term', () => {
+    component.qualifications.set(mockQualifications);
+
+    component.onSearchChange('Java');
+
+    expect(component.filteredQualifications().length).toBe(1);
+    expect(component.filteredQualifications()[0].skill).toBe('Java Developer');
+  });
+
+  it('should return all qualifications when search term is empty', () => {
+    component.qualifications.set(mockQualifications);
+
+    component.onSearchChange('');
+
+    expect(component.filteredQualifications().length).toBe(3);
+  });
+
+  it('should load employee counts for qualifications', () => {
+    component.qualifications.set(mockQualifications);
+
+    component['loadEmployeeCounts'](mockQualifications);
+
+    const req1 = httpMock.expectOne(
+      'http://localhost:8089/qualifications/1/employees'
+    );
+    const req2 = httpMock.expectOne(
+      'http://localhost:8089/qualifications/2/employees'
+    );
+    const req3 = httpMock.expectOne(
+      'http://localhost:8089/qualifications/3/employees'
+    );
+
+    req1.flush(mockEmployeesResponse);
+    req2.flush({ qualification: mockQualifications[1], employees: [] });
+    req3.flush({
+      qualification: mockQualifications[2],
+      employees: [{ id: 3, firstName: 'Bob', lastName: 'Smith' }],
+    });
+
+    expect(component.getEmployeeCount(1)).toBe(2);
+    expect(component.getEmployeeCount(2)).toBe(0);
+    expect(component.getEmployeeCount(3)).toBe(1);
+  });
+
+  it('should return 0 for unknown qualification id', () => {
+    expect(component.getEmployeeCount(999)).toBe(0);
   });
 });

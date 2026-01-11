@@ -1,117 +1,173 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormGroup,
+  FormControl,
+  Validators,
+} from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
 import { Qualification } from '../types/Qualification';
+import { forkJoin } from 'rxjs';
+import { QualificationEmployeesResponse } from '../types/QualificationEmployeeResponse';
 
 @Component({
   selector: 'app-qualifications-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './qualifications-list.component.html',
   styleUrls: ['./qualifications-list.component.css'],
 })
 export class QualificationsListComponent implements OnInit {
-  qualifications$: Observable<Qualification[]>;
-  qualifications: Qualification[] = [];
+  qualifications = signal<Qualification[]>([]);
+  searchTerm = signal<string>('');
+  showForm = signal<boolean>(false);
+  isEditMode = signal<boolean>(false);
+  selectedQualification = signal<Qualification | null>(null);
+  employeeCounts = signal<Map<number, number>>(new Map());
 
-  // Form data for create/update
-  selectedQualification: Qualification | null = null;
-  qualificationForm = {
-    id: 0,
-    designation: '',
-  };
+  filteredQualifications = computed(() => {
+    const search = this.searchTerm().toLowerCase().trim();
+    if (!search) return this.qualifications();
 
-  isEditMode = false;
-  showForm = false;
+    return this.qualifications().filter((q) =>
+      q.skill.toLowerCase().includes(search)
+    );
+  });
 
-  // TODO: Replace with AuthService when ready
-  // For now: Get token from getBearerToken.http
+  qualificationForm = new FormGroup({
+    id: new FormControl<number>(0),
+    skill: new FormControl('', {
+      validators: [
+        Validators.required,
+        Validators.minLength(2),
+        Validators.maxLength(100),
+      ],
+      nonNullable: true,
+    }),
+  });
+
   private TEMP_TOKEN =
-    'eyJhbGciOiJSUzI1NiIsImtpZCI6ImM0MDc3MzdjMTg1MzQyYTk5Y2VlYzcyMTQwM2I4NjViIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkwMDAvYXBwbGljYXRpb24vby9lbXBsb3llZV9hcGkvIiwic3ViIjoiYjBlMDExYmU0Y2VlYzliOTYwNzA0MDY3ODU0OWJmNzA4M2I5ZjAwNGQ2MGQ2MTU5NTAwNjIwOWYyMmY5NmY1ZCIsImF1ZCI6ImVtcGxveWVlX2FwaV9jbGllbnQiLCJleHAiOjE3NjgwNTgwNjgsImlhdCI6MTc2ODA1NTA2OCwiYXV0aF90aW1lIjoxNzY4MDU1MDY4LCJhY3IiOiJnb2F1dGhlbnRpay5pby9wcm92aWRlcnMvb2F1dGgyL2RlZmF1bHQiLCJhenAiOiJlbXBsb3llZV9hcGlfY2xpZW50IiwidWlkIjoiRHZuRWxLSzBvR3VkS2VwMnhkVVFlMTFaVkZDZ1V2N0hidXRUWk5rMiJ9.URmwqf7WCY_xv6omrihoFspwyeAk-wIfeYZVBgwdrWHr0DqS51fjCObm_ugcZkoaWzGoJVOlUXtj1Y6Q_QurFG3BLbZJ9FrQ7QRRE1sJPk1roI_fPjcqkLq88ZC9eiQ4qLYCOGNrz-09QD54e9-Sw_TEihmXytL6xbqAfUUg8-3z4AUg3xcR9huL8BcTaJg_KQjoogrHUlUAX-IK5lI0qePhfZj9TymbYviq0vEcVsatRqi9uHNHMDzXe5iu-tOpSimDQ25vXrdHki4WosNGRPyb9vu3oL4aWfiJnesCzxYk376APYpu5mAo2thc6STr_QLXVpSMsO0dW_BfqKLZB0VLpxhfK7St8Nxo1h7gqu-BBGCtwMy_CqtyDM5x4bnviO66WsqyrRYcCGEN4sXlxVa2ATW3K_dItD7lZRVDTQkVRsTAJbIafChyZ_6qe0U5_DGiQUd-uRGFpUA6Lj-Tq7j7dwwYlCnP-EI6GsYcqYQSDOKcKZ1Y_91WIKJ0RTlABfQUj5Po4TIhAIPZEyGHI4msrIUvLEmr6wOOM5_CeWAz4QWMqyISbzR-_pHZhhsudejZE84HD_OKcSTeWBqXYI4PI75JRUeqD4X6TkKvD6S7PN2KGqFVI-tcrgZe4qmE1QYyc7WECd4VaXqQCbdAEXDl14hr6f20RI2Ib7LMFMk'; // <-- REPLACE THIS WITH YOUR TOKEN
+    'eyJhbGciOiJSUzI1NiIsImtpZCI6ImM0MDc3MzdjMTg1MzQyYTk5Y2VlYzcyMTQwM2I4NjViIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkwMDAvYXBwbGljYXRpb24vby9lbXBsb3llZV9hcGkvIiwic3ViIjoiYjBlMDExYmU0Y2VlYzliOTYwNzA0MDY3ODU0OWJmNzA4M2I5ZjAwNGQ2MGQ2MTU5NTAwNjIwOWYyMmY5NmY1ZCIsImF1ZCI6ImVtcGxveWVlX2FwaV9jbGllbnQiLCJleHAiOjE3NjgwOTM0NzAsImlhdCI6MTc2ODA5MDQ3MCwiYXV0aF90aW1lIjoxNzY4MDkwNDcwLCJhY3IiOiJnb2F1dGhlbnRpay5pby9wcm92aWRlcnMvb2F1dGgyL2RlZmF1bHQiLCJhenAiOiJlbXBsb3llZV9hcGlfY2xpZW50IiwidWlkIjoiR2tYa2FoNUZJMlRWcVFLdmFlSUFmYkFOS1RtV29YeDZ6aUtoMFZ5dCJ9.UgqGS92iKDdrsM2hkoildmT1yZFL2pQa-Qpi_QM3_nEjWLXXUWqUfc58Czg8wPaOL1RzkFqHHjaPC6qoPORmtkqFmhf52DQRoXbC88hgjmuMUYqKFnqgnlxsImlNu6eF4l3KRWhC-jLb0hWyKF5PJiOLPr_0YAQoD2T18UdsKL67NscC5HGJR4VDjx9PLakvpsNS2jmSdjIbXo2CZkvhJ1qffU6ZY48Ur1631qXwDaRbfBL0jG8ZxCm3Q6PEEhtP80cvYM7AT1vZS1qOH_vfr2PupFwShuLu76ztq8Ku17CJ3vtN_rtc55hC7vKGNbUKq8ZUspQfLBZmUIx4Tlh187xa3-AmduU0oUrv25NdRXttE32H5jzDRFx7Sd7RhQRgDrAxQMU0RvtYP0SErS7mSK-NlJu5qEkb7tQP2GsjlaXXSDC-WpaoHh0IxrvZOEXUZCEt-1meoKNIKkWPNOCrV4EKxa9cYErjwtSVnMcdcRCSir9luSbk8qE6m349TLrYkAE3XxvlR4OPBrX9smT4xAGtU974YQf2Vn3IfMw1yMb9JSXDVF_BMnpM61vt7Yzt73R4d07HpkcYHvHS0zmg0lunq2YncNJUNXvjPQ1GATlUNLmimvlxM6sg-hvA1W7E3-CwJNTbvqTTkqKjQ_j2Y0Jp2YIqrssknfn-uAaEmxw';
 
   private apiUrl = 'http://localhost:8089/qualifications';
 
-  constructor(private http: HttpClient) {
-    this.qualifications$ = new Observable<Qualification[]>();
-  }
+  constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
     this.loadQualifications();
   }
 
   /**
-   * Load all qualifications from API
+   * Load all qualifications AND their employee counts
    */
   loadQualifications(): void {
-    this.qualifications$ = this.http.get<Qualification[]>(this.apiUrl, {
-      headers: new HttpHeaders().set(
-        'Authorization',
-        `Bearer ${this.TEMP_TOKEN}`
-      ),
-    });
+    this.http
+      .get<Qualification[]>(this.apiUrl, {
+        headers: new HttpHeaders().set(
+          'Authorization',
+          `Bearer ${this.TEMP_TOKEN}`
+        ),
+      })
+      .subscribe({
+        next: (data) => {
+          this.qualifications.set(data);
+          this.loadEmployeeCounts(data);
+        },
+        error: (error) => {
+          console.error('Error loading qualifications:', error);
+          alert('Failed to load qualifications. Check console for details.');
+        },
+      });
+  }
 
-    // Subscribe to update local array for filtering/sorting if needed
-    this.qualifications$.subscribe({
-      next: (data) => {
-        this.qualifications = data;
+  /**
+   * Load employee counts
+   */
+  private loadEmployeeCounts(qualifications: Qualification[]): void {
+    if (qualifications.length === 0) {
+      return;
+    }
+
+    const requests = qualifications.map((q) =>
+      this.http.get<QualificationEmployeesResponse>(
+        `${this.apiUrl}/${q.id}/employees`,
+        {
+          headers: new HttpHeaders().set(
+            'Authorization',
+            `Bearer ${this.TEMP_TOKEN}`
+          ),
+        }
+      )
+    );
+
+    forkJoin(requests).subscribe({
+      next: (results) => {
+        const counts = new Map<number, number>();
+
+        qualifications.forEach((q, index) => {
+          const employeeCount = results[index].employees.length;
+          counts.set(q.id, employeeCount);
+        });
+
+        this.employeeCounts.set(counts);
       },
       error: (error) => {
-        console.error('Error loading qualifications:', error);
-        alert('Failed to load qualifications. Check console for details.');
+        console.error('Error loading employee counts:', error);
       },
     });
+  }
+
+  /**
+   * Search change handler
+   */
+  onSearchChange(value: string): void {
+    this.searchTerm.set(value);
   }
 
   /**
    * Show create form
    */
   showCreateForm(): void {
-    this.isEditMode = false;
-    this.showForm = true;
-    this.qualificationForm = {
-      id: 0,
-      designation: '',
-    };
+    this.isEditMode.set(false);
+    this.showForm.set(true);
+    this.qualificationForm.reset();
   }
 
   /**
    * Show edit form with selected qualification
    */
   editQualification(qualification: Qualification): void {
-    this.isEditMode = true;
-    this.showForm = true;
-    this.selectedQualification = qualification;
-    this.qualificationForm = {
+    this.isEditMode.set(true);
+    this.showForm.set(true);
+    this.selectedQualification.set(qualification);
+    this.qualificationForm.patchValue({
       id: qualification.id,
-      designation: qualification.designation,
-    };
+      skill: qualification.skill,
+    });
   }
 
   /**
    * Cancel form and hide it
    */
   cancelForm(): void {
-    this.showForm = false;
-    this.selectedQualification = null;
-    this.qualificationForm = {
-      id: 0,
-      designation: '',
-    };
+    this.showForm.set(false);
+    this.selectedQualification.set(null);
+    this.qualificationForm.reset();
   }
 
   /**
    * Create new qualification
    */
   createQualification(): void {
-    if (!this.qualificationForm.designation.trim()) {
-      alert('Please enter a designation');
+    this.qualificationForm.markAllAsTouched();
+
+    if (this.qualificationForm.invalid) {
       return;
     }
 
     const newQualification = {
-      designation: this.qualificationForm.designation,
+      skill: this.qualificationForm.value.skill!,
     };
 
     this.http
@@ -137,23 +193,17 @@ export class QualificationsListComponent implements OnInit {
    * Update existing qualification
    */
   updateQualification(): void {
-    if (!this.qualificationForm.designation.trim()) {
-      alert('Please enter a designation');
+    this.qualificationForm.markAllAsTouched();
+
+    if (this.qualificationForm.invalid) {
       return;
     }
 
-    if (!this.selectedQualification) {
-      return;
-    }
-
-    const updatedQualification = {
-      id: this.qualificationForm.id,
-      designation: this.qualificationForm.designation,
-    };
+    const updatedQualification = this.qualificationForm.getRawValue();
 
     this.http
       .put<Qualification>(
-        `${this.apiUrl}/${this.qualificationForm.id}`,
+        `${this.apiUrl}/${updatedQualification.id}`,
         updatedQualification,
         {
           headers: new HttpHeaders()
@@ -205,23 +255,28 @@ export class QualificationsListComponent implements OnInit {
    * View employees with this qualification
    */
   viewEmployees(id: number): void {
+    const qualification = this.qualifications().find((q) => q.id === id);
+
     this.http
-      .get<any[]>(`${this.apiUrl}/${id}/employees`, {
+      .get<QualificationEmployeesResponse>(`${this.apiUrl}/${id}/employees`, {
         headers: new HttpHeaders().set(
           'Authorization',
           `Bearer ${this.TEMP_TOKEN}`
         ),
       })
       .subscribe({
-        next: (employees) => {
-          console.log('Employees with this qualification:', employees);
+        next: (response) => {
+          const employees = response.employees;
+
           if (employees.length === 0) {
             alert('No employees have this qualification yet.');
           } else {
             const employeeNames = employees
-              .map((e: any) => e.name || e.firstName + ' ' + e.lastName)
+              .map((e) => `${e.firstName} ${e.lastName}`)
               .join('\n');
-            alert(`Employees with this qualification:\n\n${employeeNames}`);
+            alert(
+              `Employees with ${response.qualification.skill}:\n\n${employeeNames}`
+            );
           }
         },
         error: (error) => {
@@ -235,10 +290,21 @@ export class QualificationsListComponent implements OnInit {
    * Submit form (create or update)
    */
   onSubmit(): void {
-    if (this.isEditMode) {
+    if (this.isEditMode()) {
       this.updateQualification();
     } else {
       this.createQualification();
     }
+  }
+
+  get skill() {
+    return this.qualificationForm.controls.skill;
+  }
+
+  /**
+   * Helper Methode um Count für eine Qualifikation zu bekommen
+   */
+  getEmployeeCount(qualificationId: number): number {
+    return this.employeeCounts().get(qualificationId) || 0;
   }
 }
