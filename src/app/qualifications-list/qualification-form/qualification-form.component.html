@@ -1,0 +1,50 @@
+<form [formGroup]="form">
+  <div class="form-group">
+    <label for="skill">
+      Bezeichnung <span class="required">*</span>
+    </label>
+    
+    <input 
+      type="text" 
+      id="skill" 
+      formControlName="skill"
+      class="form-input"
+      [class.error]="skill?.invalid && skill?.touched"
+      placeholder="z.B. Java Developer"
+    />
+
+    <p class="page-description"> {{ isEdit ? 'Ändern Sie die Bezeichnung der Qualifikation' : 'Geben Sie die Bezeichnung der Qualifikation ein' }}</p>
+    
+    <div class="error-messages" *ngIf="skill?.invalid && skill?.touched">
+      <small class="error-text" *ngIf="skill?.errors?.['required']">
+        Bezeichnung ist erforderlich
+      </small>
+      <small class="error-text" *ngIf="skill?.errors?.['minlength']">
+        Mindestens 2 Zeichen erforderlich
+      </small>
+      <small class="error-text" *ngIf="skill?.errors?.['maxlength']">
+        Maximal 100 Zeichen erlaubt
+      </small>
+    </div>
+  </div>
+
+  <p class="form-required-notice"><span>*</span> Pflichtfeld</p>
+
+  <div class="modal-actions">
+    <button 
+      type="button" 
+      class="btn btn-success"
+      [disabled]="form.invalid"
+      (click)="onSubmit()"
+    >
+      {{ isEdit ? 'Aktualisieren' : 'Erstellen' }}
+    </button>
+    <button 
+      type="button" 
+      class="btn btn-secondary" 
+      (click)="onCancel()"
+    >
+      Abbrechen
+    </button>
+  </div>
+</form>

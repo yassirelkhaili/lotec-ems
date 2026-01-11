@@ -1,0 +1,133 @@
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  font-family: var(--font-primary);
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.required {
+  color: var(--text-error);
+  margin-left: 0.25rem;
+}
+
+.page-description {
+  color: var(--text-secondary);
+  font-family: var(--font-secondary);
+  font-size: 14px;
+  margin-top: 0.2rem;
+}
+
+.form-required-notice {
+  color: var(--text-primary);
+  font-family: var(--font-primary);
+  font-size: 14px;
+  margin-top: 0.5rem;
+}
+
+
+.form-required-notice span {
+  color: var(--text-error);
+  margin-right: 0.25rem;
+}
+
+.form-input {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: var(--font-secondary);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--background-secondary);
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.form-input.error {
+  border-color: var(--text-error);
+}
+
+.form-input.error:focus {
+  box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1);
+}
+
+.error-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.2rem;
+}
+
+.error-text {
+  color: var(--text-error);
+  font-size: 0.875rem;
+  font-family: var(--font-secondary);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.modal-actions .btn {
+  min-width: 100px;
+}
+
+.btn {
+  font-family: var(--font-primary);
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.1s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-success {
+  background-color: var(--background-secondary);
+  color: white;
+}
+
+.btn-success:hover {
+  background-color: var(--background-secondary-hover);
+}
+
+.btn-success:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: var(--text-purple);
+  color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+  background-color: var(--text-purple-hover);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .modal-actions .btn {
+    width: 100%;
+  }
+}

@@ -10,6 +10,11 @@
     <div class="list-header">
       <!-- Search -->
       <div class="list-search">
+        <img
+          class="list-search-icon"
+          src="/MagnifyingGlass.webp"
+          alt="search"
+        />
         <input
           type="text"
           class="list-search-input"
@@ -17,23 +22,77 @@
           [value]="searchTerm()"
           (input)="onSearchChange($any($event.target).value)"
         />
-        <button class="list-search-button" type="button">
-          <img
-            class="list-search-icon"
-            src="/MagnifyingGlass.webp"
-            alt="search"
-          />
-        </button>
       </div>
 
-      <button class="btn btn-primary" (click)="showCreateForm()">
+      <button class="btn btn-primary" (click)="openCreateModal()">
         <span class="icon">+</span> Neue Qualifikation
       </button>
     </div>
 
-    <!-- Form -->
-    <div class="form-container" *ngIf="showForm()">
-      <!-- ... existing form ... -->
+    <div
+      class="modal-backdrop"
+      *ngIf="isModalOpen()"
+      (click)="onBackdropClick($event)"
+    >
+      <div class="modal">
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <div class="modal-header-close" (click)="closeModal()">
+            <button class="modal-close">
+              <img src="/ArrowSquareLeft.webp" alt="leftarrow" />
+            </button>
+            <span>Zurück zur Übersicht</span>
+          </div>
+          <h2>
+            @switch (modalType()) { @case ('create') { Neue Qualifikation
+            erstellen } @case ('edit') { Qualifikation bearbeiten } @case
+            ('delete') { Qualifikation löschen? } @case ('view') { Mitarbeiter
+            mit Qualifikation "{{ selectedQualification()?.skill }}" } }
+          </h2>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="modal-body">
+          @switch (modalType()) { @case ('create') {
+          <app-qualification-form
+            [form]="qualificationForm"
+            (submit)="createQualification()"
+            (cancel)="closeModal()"
+          />
+          } @case ('edit') {
+          <app-qualification-form
+            [form]="qualificationForm"
+            [isEdit]="true"
+            (submit)="updateQualification()"
+            (cancel)="closeModal()"
+          />
+          } @case ('delete') {
+          <p class="info-text">
+            Möchten Sie die Qualifikation "{{ selectedQualification()?.skill }}"
+            wirklich löschen?
+          </p>
+          <p class="info-text">
+            <span>⚠️</span>
+            Diese Aktion kann nicht rückgängig gemacht werden. Die Qualifikation
+            wird von allen Mitarbeitern entfernt ({{ getEmployeeCount(selectedQualification()?.id!) }} betroffen).
+          </p>
+          <div class="modal-actions">
+            <button class="btn btn-danger" (click)="confirmDelete()">
+              Löschen
+            </button>
+            <button class="btn btn-secondary" (click)="closeModal()">
+              Abbrechen
+            </button>
+          </div>
+          } @case ('view') {
+          <app-employee-list
+            [qualificationId]="selectedQualification()?.id!"
+            (employeesChanged)="loadQualifications()"
+            (closeRequested)="closeModal()"
+          />
+          } }
+        </div>
+      </div>
     </div>
 
     <!-- Qualifications Table -->
@@ -57,14 +116,15 @@
             <td class="actions-cell">
               <button
                 class="action-icon"
-                (click)="viewEmployees(qualification.id)"
+                (click)="openViewModal(qualification)"
                 title="View employees with this qualification"
               >
                 <img src="/eye.webp" alt="view" class="trash-icon" />
               </button>
+
               <button
                 class="action-icon"
-                (click)="editQualification(qualification)"
+                (click)="openEditModal(qualification)"
                 title="Edit qualification"
               >
                 <img
@@ -73,9 +133,10 @@
                   class="edit-icon"
                 />
               </button>
+
               <button
                 class="action-icon"
-                (click)="deleteQualification(qualification.id)"
+                (click)="openDeleteModal(qualification)"
                 title="Delete qualification"
               >
                 <img src="/Trash.webp" alt="delete" class="trash-icon" />
@@ -91,6 +152,25 @@
       </span>
     </div>
 
-    <!-- Empty States ... -->
+    <!-- Empty State -->
+    <div
+      *ngIf="
+        filteredQualifications().length === 0 && qualifications().length > 0
+      "
+      class="empty-state"
+    >
+      <p>Keine Qualifikationen gefunden für "{{ searchTerm() }}"</p>
+      <button class="btn btn-secondary" (click)="searchTerm.set('')">
+        Filter zurücksetzen
+      </button>
+    </div>
+
+    <!-- No Data State -->
+    <div *ngIf="qualifications().length === 0" class="empty-state">
+      <p>Keine Qualifikationen vorhanden.</p>
+      <button class="btn btn-primary" (click)="openCreateModal()">
+        Erste Qualifikation erstellen
+      </button>
+    </div>
   </div>
 </div>

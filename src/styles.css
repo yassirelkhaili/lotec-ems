@@ -3,7 +3,10 @@
 :root {
   --text-primary: #ffffff;
   --text-secondary: #a6a6a6;
+  --text-error: #f44336;
   --text-black: #000000;
+  --text-purple: #AA38C9;
+  --text-purple-hover: #9d34b9;
   --background-primary: #1e1d3f;
   --background-secondary: #e27800;
   --row-odd: #f3f8ff;
