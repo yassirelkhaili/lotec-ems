@@ -37,54 +37,50 @@
       <div class="modal">
         <!-- Modal Header -->
         <div class="modal-header">
+          <div class="modal-header-close" (click)="closeModal()">
+            <button class="modal-close">
+              <img src="/ArrowSquareLeft.webp" alt="leftarrow" />
+            </button>
+            <span>Zurück zur Übersicht</span>
+          </div>
           <h2>
-            @switch (modalType()) {
-              @case ('create') { Neue Qualifikation }
-              @case ('edit') { Qualifikation bearbeiten }
-              @case ('delete') { Qualifikation löschen? }
-              @case ('view') { Mitarbeiter anzeigen }
-            }
+            @switch (modalType()) { @case ('create') { Neue Qualifikation
+            erstellen } @case ('edit') { Qualifikation bearbeiten } @case
+            ('delete') { Qualifikation löschen? } @case ('view') { Mitarbeiter
+            anzeigen } }
           </h2>
-          <button class="modal-close" (click)="closeModal()">✕</button>
         </div>
 
         <!-- Modal Body -->
         <div class="modal-body">
-          @switch (modalType()) {
-            @case ('create') {
-              <app-qualification-form
-                [form]="qualificationForm"
-                (submit)="createQualification()"
-                (cancel)="closeModal()"
-              />
-            }
-            @case ('edit') {
-              <app-qualification-form
-                [form]="qualificationForm"
-                [isEdit]="true"
-                (submit)="updateQualification()"
-                (cancel)="closeModal()"
-              />
-            }
-            @case ('delete') {
-              <p>
-                Möchten Sie "{{ selectedQualification()?.skill }}" wirklich löschen?
-              </p>
-              <div class="modal-actions">
-                <button class="btn btn-danger" (click)="confirmDelete()">
-                  Löschen
-                </button>
-                <button class="btn btn-secondary" (click)="closeModal()">
-                  Abbrechen
-                </button>
-              </div>
-            }
-            @case ('view') {
-              <app-employee-list 
-                [qualificationId]="selectedQualification()?.id!" 
-              />
-            }
-          }
+          @switch (modalType()) { @case ('create') {
+          <app-qualification-form
+            [form]="qualificationForm"
+            (submit)="createQualification()"
+            (cancel)="closeModal()"
+          />
+          } @case ('edit') {
+          <app-qualification-form
+            [form]="qualificationForm"
+            [isEdit]="true"
+            (submit)="updateQualification()"
+            (cancel)="closeModal()"
+          />
+          } @case ('delete') {
+          <p>
+            Möchten Sie "{{ selectedQualification()?.skill }}" wirklich löschen?
+          </p>
+          <div class="modal-actions">
+            <button class="btn btn-danger" (click)="confirmDelete()">
+              Löschen
+            </button>
+            <button class="btn btn-secondary" (click)="closeModal()">
+              Abbrechen
+            </button>
+          </div>
+          } @case ('view') {
+          <app-employee-list [qualificationId]="selectedQualification()?.id!" />
+          } }
         </div>
       </div>
     </div>
@@ -148,7 +144,9 @@
 
     <!-- Empty State -->
     <div
-      *ngIf="filteredQualifications().length === 0 && qualifications().length > 0"
+      *ngIf="
+        filteredQualifications().length === 0 && qualifications().length > 0
+      "
       class="empty-state"
     >
       <p>Keine Qualifikationen gefunden für "{{ searchTerm() }}"</p>
@@ -158,10 +156,7 @@
     </div>
 
     <!-- No Data State -->
-    <div
-      *ngIf="qualifications().length === 0"
-      class="empty-state"
-    >
+    <div *ngIf="qualifications().length === 0" class="empty-state">
       <p>Keine Qualifikationen vorhanden.</p>
       <button class="btn btn-primary" (click)="openCreateModal()">
         Erste Qualifikation erstellen

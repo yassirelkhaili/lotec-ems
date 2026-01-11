@@ -35,7 +35,7 @@
 .employee-name {
   font-family: var(--font-primary);
   font-weight: 500;
-  color: var(--text-primary);
+  color: var(--text-black);
 }
 
 .employee-id {

@@ -2,19 +2,38 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  margin-bottom: 1.5rem;
 }
 
 .form-group label {
   font-weight: 600;
   font-family: var(--font-primary);
   color: var(--text-primary);
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .required {
-  color: #f44336;
+  color: var(--text-error);
   margin-left: 0.25rem;
+}
+
+.page-description {
+  color: var(--text-secondary);
+  font-family: var(--font-secondary);
+  font-size: 14px;
+  margin-top: 0.2rem;
+}
+
+.form-required-notice {
+  color: var(--text-primary);
+  font-family: var(--font-primary);
+  font-size: 14px;
+  margin-top: 0.5rem;
+}
+
+
+.form-required-notice span {
+  color: var(--text-error);
+  margin-right: 0.25rem;
 }
 
 .form-input {
@@ -33,7 +52,7 @@
 }
 
 .form-input.error {
-  border-color: #f44336;
+  border-color: var(--text-error);
 }
 
 .form-input.error:focus {
@@ -44,10 +63,11 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  margin-bottom: 0.2rem;
 }
 
 .error-text {
-  color: #f44336;
+  color: var(--text-error);
   font-size: 0.875rem;
   font-family: var(--font-secondary);
 }
@@ -79,12 +99,12 @@
 }
 
 .btn-success {
-  background-color: #2196f3;
+  background-color: var(--background-secondary);
   color: white;
 }
 
 .btn-success:hover {
-  background-color: #0b7dda;
+  background-color: var(--background-secondary-hover);
 }
 
 .btn-success:disabled {
@@ -93,12 +113,12 @@
 }
 
 .btn-secondary {
-  background-color: #757575;
-  color: white;
+  background-color: var(--text-purple);
+  color: var(--text-primary);
 }
 
 .btn-secondary:hover {
-  background-color: #616161;
+  background-color: var(--text-purple-hover);
 }
 
 /* Responsive */
@@ -106,7 +126,7 @@
   .modal-actions {
     flex-direction: column;
   }
-  
+
   .modal-actions .btn {
     width: 100%;
   }
