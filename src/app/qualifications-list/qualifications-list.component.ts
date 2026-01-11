@@ -10,21 +10,31 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Qualification } from '../types/Qualification';
 import { forkJoin } from 'rxjs';
 import { QualificationEmployeesResponse } from '../types/QualificationEmployeeResponse';
+import { EmployeeListComponent } from './employee-list/employee-list.component';
+import { QualificationFormComponent } from './qualification-form/qualification-form.component';
 
 @Component({
   selector: 'app-qualifications-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    QualificationFormComponent,
+    EmployeeListComponent,
+  ],
   templateUrl: './qualifications-list.component.html',
   styleUrls: ['./qualifications-list.component.css'],
 })
 export class QualificationsListComponent implements OnInit {
+  // Signals
   qualifications = signal<Qualification[]>([]);
   searchTerm = signal<string>('');
-  showForm = signal<boolean>(false);
-  isEditMode = signal<boolean>(false);
+  modalType = signal<'create' | 'edit' | 'delete' | 'view' | null>(null);
   selectedQualification = signal<Qualification | null>(null);
   employeeCounts = signal<Map<number, number>>(new Map());
+
+  // Computed Signals
+  isModalOpen = computed(() => this.modalType() !== null);
 
   filteredQualifications = computed(() => {
     const search = this.searchTerm().toLowerCase().trim();
@@ -35,6 +45,7 @@ export class QualificationsListComponent implements OnInit {
     );
   });
 
+  // Form
   qualificationForm = new FormGroup({
     id: new FormControl<number>(0),
     skill: new FormControl('', {
@@ -48,7 +59,7 @@ export class QualificationsListComponent implements OnInit {
   });
 
   private TEMP_TOKEN =
-    'eyJhbGciOiJSUzI1NiIsImtpZCI6ImM0MDc3MzdjMTg1MzQyYTk5Y2VlYzcyMTQwM2I4NjViIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkwMDAvYXBwbGljYXRpb24vby9lbXBsb3llZV9hcGkvIiwic3ViIjoiYjBlMDExYmU0Y2VlYzliOTYwNzA0MDY3ODU0OWJmNzA4M2I5ZjAwNGQ2MGQ2MTU5NTAwNjIwOWYyMmY5NmY1ZCIsImF1ZCI6ImVtcGxveWVlX2FwaV9jbGllbnQiLCJleHAiOjE3NjgwOTM0NzAsImlhdCI6MTc2ODA5MDQ3MCwiYXV0aF90aW1lIjoxNzY4MDkwNDcwLCJhY3IiOiJnb2F1dGhlbnRpay5pby9wcm92aWRlcnMvb2F1dGgyL2RlZmF1bHQiLCJhenAiOiJlbXBsb3llZV9hcGlfY2xpZW50IiwidWlkIjoiR2tYa2FoNUZJMlRWcVFLdmFlSUFmYkFOS1RtV29YeDZ6aUtoMFZ5dCJ9.UgqGS92iKDdrsM2hkoildmT1yZFL2pQa-Qpi_QM3_nEjWLXXUWqUfc58Czg8wPaOL1RzkFqHHjaPC6qoPORmtkqFmhf52DQRoXbC88hgjmuMUYqKFnqgnlxsImlNu6eF4l3KRWhC-jLb0hWyKF5PJiOLPr_0YAQoD2T18UdsKL67NscC5HGJR4VDjx9PLakvpsNS2jmSdjIbXo2CZkvhJ1qffU6ZY48Ur1631qXwDaRbfBL0jG8ZxCm3Q6PEEhtP80cvYM7AT1vZS1qOH_vfr2PupFwShuLu76ztq8Ku17CJ3vtN_rtc55hC7vKGNbUKq8ZUspQfLBZmUIx4Tlh187xa3-AmduU0oUrv25NdRXttE32H5jzDRFx7Sd7RhQRgDrAxQMU0RvtYP0SErS7mSK-NlJu5qEkb7tQP2GsjlaXXSDC-WpaoHh0IxrvZOEXUZCEt-1meoKNIKkWPNOCrV4EKxa9cYErjwtSVnMcdcRCSir9luSbk8qE6m349TLrYkAE3XxvlR4OPBrX9smT4xAGtU974YQf2Vn3IfMw1yMb9JSXDVF_BMnpM61vt7Yzt73R4d07HpkcYHvHS0zmg0lunq2YncNJUNXvjPQ1GATlUNLmimvlxM6sg-hvA1W7E3-CwJNTbvqTTkqKjQ_j2Y0Jp2YIqrssknfn-uAaEmxw';
+    'eyJhbGciOiJSUzI1NiIsImtpZCI6ImM0MDc3MzdjMTg1MzQyYTk5Y2VlYzcyMTQwM2I4NjViIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkwMDAvYXBwbGljYXRpb24vby9lbXBsb3llZV9hcGkvIiwic3ViIjoiYjBlMDExYmU0Y2VlYzliOTYwNzA0MDY3ODU0OWJmNzA4M2I5ZjAwNGQ2MGQ2MTU5NTAwNjIwOWYyMmY5NmY1ZCIsImF1ZCI6ImVtcGxveWVlX2FwaV9jbGllbnQiLCJleHAiOjE3NjgxMzUwNzgsImlhdCI6MTc2ODEzMjA3OCwiYXV0aF90aW1lIjoxNzY4MTMyMDc4LCJhY3IiOiJnb2F1dGhlbnRpay5pby9wcm92aWRlcnMvb2F1dGgyL2RlZmF1bHQiLCJhenAiOiJlbXBsb3llZV9hcGlfY2xpZW50IiwidWlkIjoiTW5vWHdQRERDWmthNHh6VVpCeWMyOWI4bTdkUGNONzJkMllrWnREMiJ9.H88B5l10cmBJzdbWBL5CQQyZDSqOZSgWloFQMwzDW1A5_9pZxrJEGkHEp1C1l-2lrvTt4PmkZyOtTAuJY0gEE-FyEhEEqvGVUKxR9PrpqmluIZHkNl85dvmtfZAhaUZc1oW91qBG8FXILQEWJFlmlAUXtD9HVJgEkzO390OwSUF6-UIgAeFzEelrh84dmEClQQrEmBTSRYmxBPhXH5FzxnCiRESoyTqTHO6J__1yS4ZdZG04f1B2ryqDXA1iUTBiVMfKOzaB8H-yFsGNW6M-CqITpEO2J_z_lg7IAIi1U55VGRGp0wUqShq7Oiuk-ixw2iqFjrWdbre8qhRJjmYXI_eN9pRPWjfcMw9AGwpUUuDuzIMtt1HWz88vYtTii1DXzT1-rGf0m8uyYCwv6KtLO7RIbuL45I8Co8N7oc5Nje92ptQPkceprJ7-Uypt4DAp-fF4gXVp6MFzfpsmlQx3mjpANsNf7fuoMKWcJbYT2HEG0W54QxsNbl0oJMW0Gne7nRh9A--oGglSZynSIXUyylUmM01TH60Ier2-vd5A_kiklNKZrVnxdTOvEyIOg-7mCG2EEhr88gT3EHiKuOvt_14Tg7Z_9EIwtEEH0IT5xPYRiFrGGhVf32Dc2SdgRGobfeFuK9BIk9dRKk1d8wUpOg1z5WrBhkzy7k1dHCELIzs';
 
   private apiUrl = 'http://localhost:8089/qualifications';
 
@@ -82,7 +93,7 @@ export class QualificationsListComponent implements OnInit {
   }
 
   /**
-   * Load employee counts
+   * Load employee counts for all qualifications
    */
   private loadEmployeeCounts(qualifications: Qualification[]): void {
     if (qualifications.length === 0) {
@@ -119,42 +130,82 @@ export class QualificationsListComponent implements OnInit {
   }
 
   /**
+   * Get employee count for a qualification
+   */
+  getEmployeeCount(qualificationId: number): number {
+    return this.employeeCounts().get(qualificationId) || 0;
+  }
+
+  /**
    * Search change handler
    */
   onSearchChange(value: string): void {
     this.searchTerm.set(value);
   }
 
+  // ========== MODAL FUNCTIONS ==========
+
   /**
-   * Show create form
+   * Open create modal
    */
-  showCreateForm(): void {
-    this.isEditMode.set(false);
-    this.showForm.set(true);
+  openCreateModal(): void {
+    this.modalType.set('create');
     this.qualificationForm.reset();
+    document.body.classList.add('modal-open');
   }
 
   /**
-   * Show edit form with selected qualification
+   * Open edit modal
    */
-  editQualification(qualification: Qualification): void {
-    this.isEditMode.set(true);
-    this.showForm.set(true);
+  openEditModal(qualification: Qualification): void {
+    this.modalType.set('edit');
     this.selectedQualification.set(qualification);
     this.qualificationForm.patchValue({
       id: qualification.id,
       skill: qualification.skill,
     });
+    document.body.classList.add('modal-open');
   }
 
   /**
-   * Cancel form and hide it
+   * Open delete confirmation modal
    */
-  cancelForm(): void {
-    this.showForm.set(false);
+  openDeleteModal(qualification: Qualification): void {
+    this.modalType.set('delete');
+    this.selectedQualification.set(qualification);
+    document.body.classList.add('modal-open');
+  }
+
+  /**
+   * Open view employees modal
+   */
+  openViewModal(qualification: Qualification): void {
+    this.modalType.set('view');
+    this.selectedQualification.set(qualification);
+    this.loadEmployeesForQualification(qualification.id);
+    document.body.classList.add('modal-open');
+  }
+
+  /**
+   * Close modal
+   */
+  closeModal(): void {
+    this.modalType.set(null);
     this.selectedQualification.set(null);
     this.qualificationForm.reset();
+    document.body.classList.remove('modal-open');
   }
+
+  /**
+   * Handle backdrop click (click outside modal)
+   */
+  onBackdropClick(event: MouseEvent): void {
+    if ((event.target as HTMLElement).classList.contains('modal-backdrop')) {
+      this.closeModal();
+    }
+  }
+
+  // ========== CRUD OPERATIONS ==========
 
   /**
    * Create new qualification
@@ -179,12 +230,12 @@ export class QualificationsListComponent implements OnInit {
       .subscribe({
         next: () => {
           this.loadQualifications();
-          this.cancelForm();
-          alert('Qualification created successfully!');
+          this.closeModal();
+          alert('Qualifikation erfolgreich erstellt!');
         },
         error: (error) => {
           console.error('Error creating qualification:', error);
-          alert('Failed to create qualification. Check console for details.');
+          alert('Fehler beim Erstellen der Qualifikation.');
         },
       });
   }
@@ -214,23 +265,22 @@ export class QualificationsListComponent implements OnInit {
       .subscribe({
         next: () => {
           this.loadQualifications();
-          this.cancelForm();
-          alert('Qualification updated successfully!');
+          this.closeModal();
+          alert('Qualifikation erfolgreich aktualisiert!');
         },
         error: (error) => {
           console.error('Error updating qualification:', error);
-          alert('Failed to update qualification. Check console for details.');
+          alert('Fehler beim Aktualisieren der Qualifikation.');
         },
       });
   }
 
   /**
-   * Delete qualification by ID
+   * Delete qualification (called from delete modal)
    */
-  deleteQualification(id: number): void {
-    if (!confirm('Are you sure you want to delete this qualification?')) {
-      return;
-    }
+  confirmDelete(): void {
+    const id = this.selectedQualification()?.id;
+    if (!id) return;
 
     this.http
       .delete(`${this.apiUrl}/${id}`, {
@@ -242,21 +292,20 @@ export class QualificationsListComponent implements OnInit {
       .subscribe({
         next: () => {
           this.loadQualifications();
-          alert('Qualification deleted successfully!');
+          this.closeModal();
+          alert('Qualifikation erfolgreich gelöscht!');
         },
         error: (error) => {
           console.error('Error deleting qualification:', error);
-          alert('Failed to delete qualification. Check console for details.');
+          alert('Fehler beim Löschen der Qualifikation.');
         },
       });
   }
 
   /**
-   * View employees with this qualification
+   * Load employees for view modal
    */
-  viewEmployees(id: number): void {
-    const qualification = this.qualifications().find((q) => q.id === id);
-
+  private loadEmployeesForQualification(id: number): void {
     this.http
       .get<QualificationEmployeesResponse>(`${this.apiUrl}/${id}/employees`, {
         headers: new HttpHeaders().set(
@@ -268,43 +317,34 @@ export class QualificationsListComponent implements OnInit {
         next: (response) => {
           const employees = response.employees;
 
-          if (employees.length === 0) {
-            alert('No employees have this qualification yet.');
-          } else {
-            const employeeNames = employees
-              .map((e) => `${e.firstName} ${e.lastName}`)
-              .join('\n');
-            alert(
-              `Employees with ${response.qualification.skill}:\n\n${employeeNames}`
-            );
-          }
+          console.log('==========================================');
+          console.log(`Skill: ${response.qualification.skill}`);
+          console.log(`Anzahl Mitarbeiter: ${employees.length}`);
+          console.table(employees);
+          console.log('==========================================');
         },
         error: (error) => {
           console.error('Error loading employees:', error);
-          alert('Failed to load employees. Check console for details.');
+          alert('Fehler beim Laden der Mitarbeiter.');
         },
       });
   }
 
   /**
-   * Submit form (create or update)
+   * Submit form (create or update based on modal type)
    */
   onSubmit(): void {
-    if (this.isEditMode()) {
+    if (this.modalType() === 'edit') {
       this.updateQualification();
-    } else {
+    } else if (this.modalType() === 'create') {
       this.createQualification();
     }
   }
 
+  /**
+   * Form control getter for template
+   */
   get skill() {
     return this.qualificationForm.controls.skill;
-  }
-
-  /**
-   * Helper Methode um Count für eine Qualifikation zu bekommen
-   */
-  getEmployeeCount(qualificationId: number): number {
-    return this.employeeCounts().get(qualificationId) || 0;
   }
 }

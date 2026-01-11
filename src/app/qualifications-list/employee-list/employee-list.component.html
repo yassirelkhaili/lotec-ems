@@ -1,0 +1,24 @@
+<div class="employee-list-container">
+  <div *ngIf="isLoading()" class="modal-loading">
+    <p>Lade Mitarbeiter...</p>
+  </div>
+
+  <div *ngIf="!isLoading() && employees().length === 0" class="empty-state">
+    <p>Keine Mitarbeiter haben diese Qualifikation.</p>
+  </div>
+
+  <div *ngIf="!isLoading() && employees().length > 0">
+    <p class="employee-count">
+      {{ employees().length }} Mitarbeiter mit dieser Qualifikation:
+    </p>
+    
+    <ul class="employee-list">
+      <li *ngFor="let employee of employees()" class="employee-item">
+        <span class="employee-name">
+          {{ employee.firstName }} {{ employee.lastName }}
+        </span>
+        <span class="employee-id">ID: {{ employee.id }}</span>
+      </li>
+    </ul>
+  </div>
+</div>

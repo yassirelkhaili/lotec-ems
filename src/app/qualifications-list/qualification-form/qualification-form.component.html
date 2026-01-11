@@ -1,0 +1,45 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div class="form-group">
+    <label for="skill">
+      Bezeichnung <span class="required">*</span>
+    </label>
+    
+    <input 
+      type="text" 
+      id="skill" 
+      formControlName="skill"
+      class="form-input"
+      [class.error]="skill?.invalid && skill?.touched"
+      placeholder="z.B. Java Developer"
+    />
+    
+    <div class="error-messages" *ngIf="skill?.invalid && skill?.touched">
+      <small class="error-text" *ngIf="skill?.errors?.['required']">
+        Bezeichnung ist erforderlich
+      </small>
+      <small class="error-text" *ngIf="skill?.errors?.['minlength']">
+        Mindestens 2 Zeichen erforderlich
+      </small>
+      <small class="error-text" *ngIf="skill?.errors?.['maxlength']">
+        Maximal 100 Zeichen erlaubt
+      </small>
+    </div>
+  </div>
+
+  <div class="modal-actions">
+    <button 
+      type="submit" 
+      class="btn btn-success"
+      [disabled]="form.invalid"
+    >
+      {{ isEdit ? 'Aktualisieren' : 'Erstellen' }}
+    </button>
+    <button 
+      type="button" 
+      class="btn btn-secondary" 
+      (click)="onCancel()"
+    >
+      Abbrechen
+    </button>
+  </div>
+</form>

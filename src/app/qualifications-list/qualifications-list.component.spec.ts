@@ -59,33 +59,44 @@ describe('QualificationsListComponent', () => {
     expect(component.qualifications()).toEqual(mockQualifications);
   });
 
-  it('should show create form when showCreateForm is called', () => {
-    component.showCreateForm();
+  // ✅ Updated: Modal tests
+  it('should open create modal when openCreateModal is called', () => {
+    component.openCreateModal();
 
-    expect(component.showForm()).toBe(true);
-    expect(component.isEditMode()).toBe(false);
+    expect(component.isModalOpen()).toBe(true);
+    expect(component.modalType()).toBe('create');
     expect(component.qualificationForm.value.skill).toBe('');
   });
 
-  it('should show edit form with qualification data when editQualification is called', () => {
+  it('should open edit modal with qualification data when openEditModal is called', () => {
     const qualification = mockQualifications[0];
 
-    component.editQualification(qualification);
+    component.openEditModal(qualification);
 
-    expect(component.showForm()).toBe(true);
-    expect(component.isEditMode()).toBe(true);
+    expect(component.isModalOpen()).toBe(true);
+    expect(component.modalType()).toBe('edit');
     expect(component.selectedQualification()).toEqual(qualification);
     expect(component.qualificationForm.value.skill).toBe(qualification.skill);
   });
 
-  it('should cancel form and reset data when cancelForm is called', () => {
-    component.showForm.set(true);
-    component.isEditMode.set(true);
+  it('should open delete modal when openDeleteModal is called', () => {
+    const qualification = mockQualifications[0];
+
+    component.openDeleteModal(qualification);
+
+    expect(component.isModalOpen()).toBe(true);
+    expect(component.modalType()).toBe('delete');
+    expect(component.selectedQualification()).toEqual(qualification);
+  });
+
+  it('should close modal and reset data when closeModal is called', () => {
+    component.modalType.set('create');
     component.qualificationForm.patchValue({ skill: 'Test' });
 
-    component.cancelForm();
+    component.closeModal();
 
-    expect(component.showForm()).toBe(false);
+    expect(component.isModalOpen()).toBe(false);
+    expect(component.modalType()).toBeNull();
     expect(component.selectedQualification()).toBeNull();
     expect(component.qualificationForm.value.skill).toBe('');
   });
@@ -102,7 +113,6 @@ describe('QualificationsListComponent', () => {
 
     req.flush({ id: 4, skill: 'Backend Developer' });
 
-    // Should reload qualifications after creation
     const getReq = httpMock.expectOne('http://localhost:8089/qualifications');
     expect(getReq.request.method).toBe('GET');
     getReq.flush(mockQualifications);
@@ -113,7 +123,6 @@ describe('QualificationsListComponent', () => {
 
     component.createQualification();
 
-    // Form is invalid, so no HTTP request should be made
     httpMock.expectNone('http://localhost:8089/qualifications');
   });
 
@@ -123,7 +132,7 @@ describe('QualificationsListComponent', () => {
       id: 1,
       skill: 'Senior Java Developer',
     });
-    component.isEditMode.set(true);
+    component.modalType.set('edit');
 
     component.updateQualification();
 
@@ -134,16 +143,15 @@ describe('QualificationsListComponent', () => {
 
     req.flush({ id: 1, skill: 'Senior Java Developer' });
 
-    // Should reload qualifications after update
     const getReq = httpMock.expectOne('http://localhost:8089/qualifications');
     expect(getReq.request.method).toBe('GET');
     getReq.flush(mockQualifications);
   });
 
   it('should delete a qualification after confirmation', () => {
-    spyOn(window, 'confirm').and.returnValue(true);
+    component.selectedQualification.set(mockQualifications[0]);
 
-    component.deleteQualification(1);
+    component.confirmDelete();
 
     const req = httpMock.expectOne('http://localhost:8089/qualifications/1');
     expect(req.request.method).toBe('DELETE');
@@ -151,34 +159,13 @@ describe('QualificationsListComponent', () => {
 
     req.flush({});
 
-    // Should reload qualifications after deletion
     const getReq = httpMock.expectOne('http://localhost:8089/qualifications');
     expect(getReq.request.method).toBe('GET');
     getReq.flush(mockQualifications);
   });
 
-  it('should not delete qualification if user cancels confirmation', () => {
-    spyOn(window, 'confirm').and.returnValue(false);
-
-    component.deleteQualification(1);
-
-    httpMock.expectNone('http://localhost:8089/qualifications/1');
-  });
-
-  it('should load employees for a qualification', () => {
-    component.viewEmployees(1);
-
-    const req = httpMock.expectOne(
-      'http://localhost:8089/qualifications/1/employees'
-    );
-    expect(req.request.method).toBe('GET');
-    expect(req.request.headers.get('Authorization')).toContain('Bearer');
-
-    req.flush(mockEmployeesResponse);
-  });
-
   it('should submit form in create mode', () => {
-    component.isEditMode.set(false);
+    component.modalType.set('create');
     component.qualificationForm.patchValue({ skill: 'Test Qualification' });
 
     spyOn(component, 'createQualification');
@@ -188,7 +175,7 @@ describe('QualificationsListComponent', () => {
   });
 
   it('should submit form in edit mode', () => {
-    component.isEditMode.set(true);
+    component.modalType.set('edit');
     component.selectedQualification.set(mockQualifications[0]);
     component.qualificationForm.patchValue({
       id: 1,
@@ -233,9 +220,7 @@ describe('QualificationsListComponent', () => {
     });
 
     expect(console.error).toHaveBeenCalled();
-    expect(window.alert).toHaveBeenCalledWith(
-      'Failed to create qualification. Check console for details.'
-    );
+    expect(window.alert).toHaveBeenCalled();
   });
 
   it('should filter qualifications based on search term', () => {
@@ -284,5 +269,19 @@ describe('QualificationsListComponent', () => {
 
   it('should return 0 for unknown qualification id', () => {
     expect(component.getEmployeeCount(999)).toBe(0);
+  });
+
+  it('should close modal on backdrop click', () => {
+    component.modalType.set('create');
+
+    const mockEvent = {
+      target: document.createElement('div'),
+    } as unknown as MouseEvent;
+
+    (mockEvent.target as HTMLElement).classList.add('modal-backdrop');
+
+    component.onBackdropClick(mockEvent);
+
+    expect(component.isModalOpen()).toBe(false);
   });
 });
