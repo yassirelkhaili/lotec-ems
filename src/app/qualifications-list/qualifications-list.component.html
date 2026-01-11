@@ -67,8 +67,14 @@
             (cancel)="closeModal()"
           />
           } @case ('delete') {
-          <p>
-            Möchten Sie "{{ selectedQualification()?.skill }}" wirklich löschen?
+          <p class="info-text">
+            Möchten Sie die Qualifikation "{{ selectedQualification()?.skill }}"
+            wirklich löschen?
+          </p>
+          <p class="info-text">
+            <span>⚠️</span>
+            Diese Aktion kann nicht rückgängig gemacht werden. Die Qualifikation
+            wird von allen Mitarbeitern entfernt ({{ getEmployeeCount(selectedQualification()?.id!) }} betroffen).
           </p>
           <div class="modal-actions">
             <button class="btn btn-danger" (click)="confirmDelete()">

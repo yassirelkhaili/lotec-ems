@@ -312,6 +312,14 @@
   gap: 1rem;
 }
 
+.info-text {
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+  font-family: var(--font-primary);
+  font-size: 0.95rem;
+  margin-top: 1rem;
+}
+
 .modal-header-close {
   display: flex;
   justify-content: center;
@@ -322,9 +330,9 @@
 }
 
 .modal-header-close span {
-    color: var(--text-primary);
-    font-family: var(--font-primary);
-    font-size: 18px;
+  color: var(--text-primary);
+  font-family: var(--font-primary);
+  font-size: 18px;
 }
 
 .modal-header h2 {
@@ -424,7 +432,6 @@
 /* Delete Confirmation Specific */
 .modal-body p {
   font-family: var(--font-secondary);
-  color: var(--text-primary);
   font-size: 1rem;
   line-height: 1.5;
   margin-bottom: 1.5rem;
