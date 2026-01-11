@@ -1,24 +1,79 @@
 <div class="employee-list-container">
+  <!-- Loading State -->
   <div *ngIf="isLoading()" class="modal-loading">
     <p>Lade Mitarbeiter...</p>
   </div>
 
-  <div *ngIf="!isLoading() && employees().length === 0" class="empty-state">
-    <p>Keine Mitarbeiter haben diese Qualifikation.</p>
-  </div>
+  <!-- Content -->
+  <div *ngIf="!isLoading()">
+    <!-- Current Employees Section -->
+    <div class="current-employees-section">
+      <!-- Empty State -->
+      <div *ngIf="employees().length === 0" class="empty-state">
+        <p>Keine Mitarbeiter haben diese Qualifikation.</p>
+      </div>
 
-  <div *ngIf="!isLoading() && employees().length > 0">
-    <p class="employee-count">
-      {{ employees().length }} Mitarbeiter mit dieser Qualifikation:
-    </p>
-    
-    <ul class="employee-list">
-      <li *ngFor="let employee of employees()" class="employee-item">
-        <span class="employee-name">
-          {{ employee.firstName }} {{ employee.lastName }}
-        </span>
-        <span class="employee-id">ID: {{ employee.id }}</span>
-      </li>
-    </ul>
+      <!-- Employee List -->
+      <div *ngIf="employees().length > 0">
+        <p class="info-text">{{ employees().length }} Mitarbeiter gefunden:</p>
+
+        <ul class="employee-list">
+          <li *ngFor="let employee of employees()" class="employee-item">
+            <span class="employee-name">
+              {{ employee.firstName }} {{ employee.lastName }}
+            </span>
+
+            <button
+              class="btn-remove-text"
+              (click)="removeEmployeeFromQualification(employee.id)"
+              title="Mitarbeiter entfernen"
+            >
+              Entfernen
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <hr class="divider" />
+
+    <!-- Add Employee Section -->
+    <div class="add-employee-section">
+      <p class="info-text">Qualifikation zu Mitarbeiter hinzufügen</p>
+
+      <div class="add-employee-form">
+        <select
+          class="employee-select"
+          [(ngModel)]="selectedEmployeeId"
+          [disabled]="availableEmployees().length === 0 || isAddingEmployee()"
+        >
+          <option [ngValue]="null">-- Mitarbeiter auswählen --</option>
+          <option
+            *ngFor="let employee of availableEmployees()"
+            [ngValue]="employee.id"
+          >
+            {{ employee.firstName }} {{ employee.lastName }}
+          </option>
+        </select>
+
+        <button
+          class="btn-add-text"
+          (click)="addEmployeeToQualification()"
+          [disabled]="!selectedEmployeeId() || isAddingEmployee()"
+        >
+          {{ isAddingEmployee() ? "Wird hinzugefügt..." : "+ Hinzufügen" }}
+        </button>
+      </div>
+
+      <p class="info-text" *ngIf="availableEmployees().length === 0">
+        Alle Mitarbeiter haben bereits diese Qualifikation.
+      </p>
+    </div>
+
+    <!-- Close Button -->
+    <div class="modal-footer">
+      <button class="btn-close" (click)="closeModal()">Schließen</button>
+    </div>
   </div>
 </div>

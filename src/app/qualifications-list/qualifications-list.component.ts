@@ -58,8 +58,9 @@ export class QualificationsListComponent implements OnInit {
     }),
   });
 
+  // TODO: Replace with AuthService (Marouane)
   private TEMP_TOKEN =
-    'eyJhbGciOiJSUzI1NiIsImtpZCI6ImM0MDc3MzdjMTg1MzQyYTk5Y2VlYzcyMTQwM2I4NjViIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkwMDAvYXBwbGljYXRpb24vby9lbXBsb3llZV9hcGkvIiwic3ViIjoiYjBlMDExYmU0Y2VlYzliOTYwNzA0MDY3ODU0OWJmNzA4M2I5ZjAwNGQ2MGQ2MTU5NTAwNjIwOWYyMmY5NmY1ZCIsImF1ZCI6ImVtcGxveWVlX2FwaV9jbGllbnQiLCJleHAiOjE3NjgxMzgyMTMsImlhdCI6MTc2ODEzNTIxMywiYXV0aF90aW1lIjoxNzY4MTM1MjEzLCJhY3IiOiJnb2F1dGhlbnRpay5pby9wcm92aWRlcnMvb2F1dGgyL2RlZmF1bHQiLCJhenAiOiJlbXBsb3llZV9hcGlfY2xpZW50IiwidWlkIjoiU1JYWHhndGwxZzM4UTdleDZ5M25ndERnN1VnZUlMeVgzZDYxRlBEaiJ9.f067LLzxBohRuicV_YaGdemT-mWQVTbHnL2Fit1XVYvMNE_KdYfzT5voWtlNAoebS7YwzpLfyesGn6rBFE_-x-MWJsOVg3u1Vv9c6eCrikRmT6Ump9XDYGarqf7tetSWlCwWNh8NSKzi1np2fPCQ90FSRxu_gKQPcLoGUHVyUjPmmcFeWTdgkmKvQd58NhMOYPs4SV-TqUAvlspj094As9gtv7PsdXm3l9k9LYJRLJ4pkNarELo0P9v8vMLySWNf67tczwfBXXBPY9rT15SPEDvlurOEFmD-uFDnSb2WCLz4MH0otTCEQz1IyjH8LT6ezbJcHzj17vP8FJ47ri3JeJQ1PQ3xn0vwxK6SaPDoGm9qtzecUhHP-D26t2bwEJ-PxlZXhfMexNO4xZL7-JibAw534k_IUErSqe845U9__3wjecNoASutKWGqJ8djFLwjOaxORDFPbIiU2olnt-vUQ1Sc5JLXf1h7QeNq46kbjVrMBZfayF5pTZzK_Uubsw8D-K0FX74gQXdYU-20diVDqfbFGt0WYIWFo2Uxpl-eKkuP_xiDJYx_0yBKjp2liUnLxkcMsagSL34M7BK4FVKRQdtKWVlJxqKs2SzJs9K_jLN4P1_LalwLehA1ZzqTtUEcsYPEOvvps9STW33KIGh0GvkXd4NOTokDtlYgt3HDmVQ';
+    'eyJhbGciOiJSUzI1NiIsImtpZCI6ImM0MDc3MzdjMTg1MzQyYTk5Y2VlYzcyMTQwM2I4NjViIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkwMDAvYXBwbGljYXRpb24vby9lbXBsb3llZV9hcGkvIiwic3ViIjoiYjBlMDExYmU0Y2VlYzliOTYwNzA0MDY3ODU0OWJmNzA4M2I5ZjAwNGQ2MGQ2MTU5NTAwNjIwOWYyMmY5NmY1ZCIsImF1ZCI6ImVtcGxveWVlX2FwaV9jbGllbnQiLCJleHAiOjE3NjgxNjE0OTEsImlhdCI6MTc2ODE1ODQ5MSwiYXV0aF90aW1lIjoxNzY4MTU4NDkxLCJhY3IiOiJnb2F1dGhlbnRpay5pby9wcm92aWRlcnMvb2F1dGgyL2RlZmF1bHQiLCJhenAiOiJlbXBsb3llZV9hcGlfY2xpZW50IiwidWlkIjoib3VyYnNhVGFxTGpNSWFoTWt4VElESmg3b200VG5nY2VjSElxSnVOUSJ9.KRBoCpCWHkq-OI6rW8fTvNUVQ4f7dnL2q73CLLLw-Tdb397IHvX6ImzH5m6DXT4Uh2mksAykkI2Qeaky7SEdpZ4sLz1897CN7KHkDrwbgK2ErrMJyxyfPUuBWZCQsjuaEAKxFCRrE-uffpNwixZFi03Juqd8xwK_xGoO5BmRoD9MSx372-cBHIp2HbIBJPu6_NA4VVTFiKXoiHRuPibc-BCe2wBE5CeyRzlvCwVbETB0M8Bg-mmNtIPp5DfwA52QeOw_OqqEsY0eShEBpM4eqHu5bAnGEnEg2z6Zqw3IE8YepIgBS_L66nIXn4zxRDpbF1KFrwdtNXc76xLjWRhatg9eYVgqDTgfh33YKoSqlML2lNhWkJ2Fka4BJXb683PyvOb7qrUm3ehXVzM4NDvYYu57UagKgymajeM8wmAKrhN0eqmL7dmvUaCjH0Rc3qxooa6Ptaro9bf03CfGGginXOEi0O6Xasi0desxdUbvPxIgj0ng42Yu8oTGNA5LAIbovl-6k1zZXMQi2wncNpCiNQNnGwXj2gFDy5hzkbkY19fSWM4nnLM0-AQTYVT8rrR_4mpC6le-Yif2jFqWeWaNH-AwuTCkD8j5gKA72buAcpwGHZ4VlV4oZuqNb1wcQIePp-Ot7xfBkdOQTPCz5flvnyoRnELTGnvxWCLAWXA31UA';
 
   private apiUrl = 'http://localhost:8089/qualifications';
 
@@ -182,7 +183,6 @@ export class QualificationsListComponent implements OnInit {
   openViewModal(qualification: Qualification): void {
     this.modalType.set('view');
     this.selectedQualification.set(qualification);
-    this.loadEmployeesForQualification(qualification.id);
     document.body.classList.add('modal-open');
   }
 
@@ -298,34 +298,6 @@ export class QualificationsListComponent implements OnInit {
         error: (error) => {
           console.error('Error deleting qualification:', error);
           alert('Fehler beim Löschen der Qualifikation.');
-        },
-      });
-  }
-
-  /**
-   * Load employees for view modal
-   */
-  private loadEmployeesForQualification(id: number): void {
-    this.http
-      .get<QualificationEmployeesResponse>(`${this.apiUrl}/${id}/employees`, {
-        headers: new HttpHeaders().set(
-          'Authorization',
-          `Bearer ${this.TEMP_TOKEN}`
-        ),
-      })
-      .subscribe({
-        next: (response) => {
-          const employees = response.employees;
-
-          console.log('==========================================');
-          console.log(`Skill: ${response.qualification.skill}`);
-          console.log(`Anzahl Mitarbeiter: ${employees.length}`);
-          console.table(employees);
-          console.log('==========================================');
-        },
-        error: (error) => {
-          console.error('Error loading employees:', error);
-          alert('Fehler beim Laden der Mitarbeiter.');
         },
       });
   }

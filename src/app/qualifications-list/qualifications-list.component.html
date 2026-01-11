@@ -47,7 +47,7 @@
             @switch (modalType()) { @case ('create') { Neue Qualifikation
             erstellen } @case ('edit') { Qualifikation bearbeiten } @case
             ('delete') { Qualifikation löschen? } @case ('view') { Mitarbeiter
-            anzeigen } }
+            mit Qualifikation "{{ selectedQualification()?.skill }}" } }
           </h2>
         </div>
 
@@ -79,7 +79,11 @@
             </button>
           </div>
           } @case ('view') {
-          <app-employee-list [qualificationId]="selectedQualification()?.id!" />
+          <app-employee-list
+            [qualificationId]="selectedQualification()?.id!"
+            (employeesChanged)="loadQualifications()"
+            (closeRequested)="closeModal()"
+          />
           } }
         </div>
       </div>
