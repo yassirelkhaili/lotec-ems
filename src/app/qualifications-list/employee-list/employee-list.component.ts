@@ -120,11 +120,11 @@ export class EmployeeListComponent implements OnInit {
 
     this.isAddingEmployee.set(true);
 
-    // POST /employees/{id}/qualifications mit Body: { qualificationId: X }
+    // POST /employees/{id}/qualifications
     this.http
       .post(
         `${this.employeesApiUrl}/${employeeId}/qualifications`,
-        { qualificationId: this.qualificationId },
+        { skill: this.qualificationName() },
         {
           headers: new HttpHeaders()
             .set('Authorization', `Bearer ${this.TEMP_TOKEN}`)
