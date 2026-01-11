@@ -8,6 +8,8 @@ import {
 } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Qualification } from '../types/Qualification';
+import { forkJoin } from 'rxjs';
+import { QualificationEmployeesResponse } from '../types/QualificationEmployeeResponse';
 
 @Component({
   selector: 'app-qualifications-list',
@@ -22,6 +24,7 @@ export class QualificationsListComponent implements OnInit {
   showForm = signal<boolean>(false);
   isEditMode = signal<boolean>(false);
   selectedQualification = signal<Qualification | null>(null);
+  employeeCounts = signal<Map<number, number>>(new Map());
 
   filteredQualifications = computed(() => {
     const search = this.searchTerm().toLowerCase().trim();
@@ -45,7 +48,7 @@ export class QualificationsListComponent implements OnInit {
   });
 
   private TEMP_TOKEN =
-    'eyJhbGciOiJSUzI1NiIsImtpZCI6ImM0MDc3MzdjMTg1MzQyYTk5Y2VlYzcyMTQwM2I4NjViIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkwMDAvYXBwbGljYXRpb24vby9lbXBsb3llZV9hcGkvIiwic3ViIjoiYjBlMDExYmU0Y2VlYzliOTYwNzA0MDY3ODU0OWJmNzA4M2I5ZjAwNGQ2MGQ2MTU5NTAwNjIwOWYyMmY5NmY1ZCIsImF1ZCI6ImVtcGxveWVlX2FwaV9jbGllbnQiLCJleHAiOjE3NjgwOTAzNjUsImlhdCI6MTc2ODA4NzM2NSwiYXV0aF90aW1lIjoxNzY4MDg3MzY1LCJhY3IiOiJnb2F1dGhlbnRpay5pby9wcm92aWRlcnMvb2F1dGgyL2RlZmF1bHQiLCJhenAiOiJlbXBsb3llZV9hcGlfY2xpZW50IiwidWlkIjoiYWdaWXJ4dHFwUTR5OHZ0R2RSaXZGN0cyZHFJeXV0TUc2WGVXd3dzNiJ9.gI-OEl5Odhp7d-C_ZJwR8c2gbQ-1YNoasbJFdsuHQ6Cs4pYVSVdc9nRdV7uyhBHRqSfcsAb0FyKv2pMyaBsu0aDjkE1W17buoaPAXPtGI1ICd3O0zv4cjgq1tC3Xx7qHrRQ9DEhFxg0JnaER30zFQWhPjr85JtekfQn6cLb7uO8G9T6ItQEHZHOVNCb70m20uw-cnrKaP8x1NRvuOJRoMmu7svMHPBt9buIqrZW04_xBUzw9cnwK39dY25JiA_3kY6j5MTuT3HAlDVncd1vbXwUjCalBt8Pz0iMTJGHciy-S-yqe3vhnUcGw8MZeQbpBY83hN67mUEucnb2voiqJvD_f9YcffqohL_z6Txdj1Q13KHDA9cAdXgxRkd4unoWNnVK80iXRShxVDwUp6wDSuTeDqvIiIvCxD4UkJuw4s_ncB_Q_v_dcfZzB7oliLH-_ATfdL8ErD2CTAtpGa54I5_a_FV_CakjO6GvCvSUAbGc-GiS4-86XMCzTXVaD230hJ1tq9nhpbZwY7OYR6XpjfERhAxrU2lx0REYOaGzxtFJIIrPuYOrHXx4dm6ANofn4zmvppZibr0X6Kp8UATmhKLgae7fMadg-kvcvHbK8DkOlvS4tN24N91AZm45x5Quyvy14fFqcFPwUKDuko_hvocKfg4uxpj7oOvO1SaXwunI';
+    'eyJhbGciOiJSUzI1NiIsImtpZCI6ImM0MDc3MzdjMTg1MzQyYTk5Y2VlYzcyMTQwM2I4NjViIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkwMDAvYXBwbGljYXRpb24vby9lbXBsb3llZV9hcGkvIiwic3ViIjoiYjBlMDExYmU0Y2VlYzliOTYwNzA0MDY3ODU0OWJmNzA4M2I5ZjAwNGQ2MGQ2MTU5NTAwNjIwOWYyMmY5NmY1ZCIsImF1ZCI6ImVtcGxveWVlX2FwaV9jbGllbnQiLCJleHAiOjE3NjgwOTM0NzAsImlhdCI6MTc2ODA5MDQ3MCwiYXV0aF90aW1lIjoxNzY4MDkwNDcwLCJhY3IiOiJnb2F1dGhlbnRpay5pby9wcm92aWRlcnMvb2F1dGgyL2RlZmF1bHQiLCJhenAiOiJlbXBsb3llZV9hcGlfY2xpZW50IiwidWlkIjoiR2tYa2FoNUZJMlRWcVFLdmFlSUFmYkFOS1RtV29YeDZ6aUtoMFZ5dCJ9.UgqGS92iKDdrsM2hkoildmT1yZFL2pQa-Qpi_QM3_nEjWLXXUWqUfc58Czg8wPaOL1RzkFqHHjaPC6qoPORmtkqFmhf52DQRoXbC88hgjmuMUYqKFnqgnlxsImlNu6eF4l3KRWhC-jLb0hWyKF5PJiOLPr_0YAQoD2T18UdsKL67NscC5HGJR4VDjx9PLakvpsNS2jmSdjIbXo2CZkvhJ1qffU6ZY48Ur1631qXwDaRbfBL0jG8ZxCm3Q6PEEhtP80cvYM7AT1vZS1qOH_vfr2PupFwShuLu76ztq8Ku17CJ3vtN_rtc55hC7vKGNbUKq8ZUspQfLBZmUIx4Tlh187xa3-AmduU0oUrv25NdRXttE32H5jzDRFx7Sd7RhQRgDrAxQMU0RvtYP0SErS7mSK-NlJu5qEkb7tQP2GsjlaXXSDC-WpaoHh0IxrvZOEXUZCEt-1meoKNIKkWPNOCrV4EKxa9cYErjwtSVnMcdcRCSir9luSbk8qE6m349TLrYkAE3XxvlR4OPBrX9smT4xAGtU974YQf2Vn3IfMw1yMb9JSXDVF_BMnpM61vt7Yzt73R4d07HpkcYHvHS0zmg0lunq2YncNJUNXvjPQ1GATlUNLmimvlxM6sg-hvA1W7E3-CwJNTbvqTTkqKjQ_j2Y0Jp2YIqrssknfn-uAaEmxw';
 
   private apiUrl = 'http://localhost:8089/qualifications';
 
@@ -56,7 +59,7 @@ export class QualificationsListComponent implements OnInit {
   }
 
   /**
-   * Load all qualifications from API
+   * Load all qualifications AND their employee counts
    */
   loadQualifications(): void {
     this.http
@@ -69,12 +72,50 @@ export class QualificationsListComponent implements OnInit {
       .subscribe({
         next: (data) => {
           this.qualifications.set(data);
+          this.loadEmployeeCounts(data);
         },
         error: (error) => {
           console.error('Error loading qualifications:', error);
           alert('Failed to load qualifications. Check console for details.');
         },
       });
+  }
+
+  /**
+   * Load employee counts
+   */
+  private loadEmployeeCounts(qualifications: Qualification[]): void {
+    if (qualifications.length === 0) {
+      return;
+    }
+
+    const requests = qualifications.map((q) =>
+      this.http.get<QualificationEmployeesResponse>(
+        `${this.apiUrl}/${q.id}/employees`,
+        {
+          headers: new HttpHeaders().set(
+            'Authorization',
+            `Bearer ${this.TEMP_TOKEN}`
+          ),
+        }
+      )
+    );
+
+    forkJoin(requests).subscribe({
+      next: (results) => {
+        const counts = new Map<number, number>();
+
+        qualifications.forEach((q, index) => {
+          const employeeCount = results[index].employees.length;
+          counts.set(q.id, employeeCount);
+        });
+
+        this.employeeCounts.set(counts);
+      },
+      error: (error) => {
+        console.error('Error loading employee counts:', error);
+      },
+    });
   }
 
   /**
@@ -214,23 +255,28 @@ export class QualificationsListComponent implements OnInit {
    * View employees with this qualification
    */
   viewEmployees(id: number): void {
+    const qualification = this.qualifications().find((q) => q.id === id);
+
     this.http
-      .get<any[]>(`${this.apiUrl}/${id}/employees`, {
+      .get<QualificationEmployeesResponse>(`${this.apiUrl}/${id}/employees`, {
         headers: new HttpHeaders().set(
           'Authorization',
           `Bearer ${this.TEMP_TOKEN}`
         ),
       })
       .subscribe({
-        next: (employees) => {
-          console.log('Employees with this qualification:', employees);
+        next: (response) => {
+          const employees = response.employees;
+
           if (employees.length === 0) {
             alert('No employees have this qualification yet.');
           } else {
             const employeeNames = employees
-              .map((e: any) => e.name || e.firstName + ' ' + e.lastName)
+              .map((e) => `${e.firstName} ${e.lastName}`)
               .join('\n');
-            alert(`Employees with this qualification:\n\n${employeeNames}`);
+            alert(
+              `Employees with ${response.qualification.skill}:\n\n${employeeNames}`
+            );
           }
         },
         error: (error) => {
@@ -253,5 +299,12 @@ export class QualificationsListComponent implements OnInit {
 
   get skill() {
     return this.qualificationForm.controls.skill;
+  }
+
+  /**
+   * Helper Methode um Count für eine Qualifikation zu bekommen
+   */
+  getEmployeeCount(qualificationId: number): number {
+    return this.employeeCounts().get(qualificationId) || 0;
   }
 }

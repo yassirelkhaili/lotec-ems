@@ -1,11 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
-  HttpClientTestingModule,
   HttpTestingController,
+  provideHttpClientTesting,
 } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { QualificationsListComponent } from './qualifications-list.component';
 import { Qualification } from '../types/Qualification';
+import { QualificationEmployeesResponse } from '../types/QualificationEmployeeResponse';
 
 describe('QualificationsListComponent', () => {
   let component: QualificationsListComponent;
@@ -18,13 +20,18 @@ describe('QualificationsListComponent', () => {
     { id: 3, skill: 'Scrum Master' },
   ];
 
+  const mockEmployeesResponse: QualificationEmployeesResponse = {
+    qualification: { id: 1, skill: 'Java Developer' },
+    employees: [
+      { id: 1, firstName: 'John', lastName: 'Doe' },
+      { id: 2, firstName: 'Jane', lastName: 'Smith' },
+    ],
+  };
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        QualificationsListComponent,
-        HttpClientTestingModule,
-        ReactiveFormsModule,
-      ],
+      imports: [QualificationsListComponent, ReactiveFormsModule],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(QualificationsListComponent);
@@ -159,11 +166,6 @@ describe('QualificationsListComponent', () => {
   });
 
   it('should load employees for a qualification', () => {
-    const mockEmployees = [
-      { id: 1, firstName: 'John', lastName: 'Doe' },
-      { id: 2, firstName: 'Jane', lastName: 'Smith' },
-    ];
-
     component.viewEmployees(1);
 
     const req = httpMock.expectOne(
@@ -172,7 +174,7 @@ describe('QualificationsListComponent', () => {
     expect(req.request.method).toBe('GET');
     expect(req.request.headers.get('Authorization')).toContain('Bearer');
 
-    req.flush(mockEmployees);
+    req.flush(mockEmployeesResponse);
   });
 
   it('should submit form in create mode', () => {
@@ -251,5 +253,36 @@ describe('QualificationsListComponent', () => {
     component.onSearchChange('');
 
     expect(component.filteredQualifications().length).toBe(3);
+  });
+
+  it('should load employee counts for qualifications', () => {
+    component.qualifications.set(mockQualifications);
+
+    component['loadEmployeeCounts'](mockQualifications);
+
+    const req1 = httpMock.expectOne(
+      'http://localhost:8089/qualifications/1/employees'
+    );
+    const req2 = httpMock.expectOne(
+      'http://localhost:8089/qualifications/2/employees'
+    );
+    const req3 = httpMock.expectOne(
+      'http://localhost:8089/qualifications/3/employees'
+    );
+
+    req1.flush(mockEmployeesResponse);
+    req2.flush({ qualification: mockQualifications[1], employees: [] });
+    req3.flush({
+      qualification: mockQualifications[2],
+      employees: [{ id: 3, firstName: 'Bob', lastName: 'Smith' }],
+    });
+
+    expect(component.getEmployeeCount(1)).toBe(2);
+    expect(component.getEmployeeCount(2)).toBe(0);
+    expect(component.getEmployeeCount(3)).toBe(1);
+  });
+
+  it('should return 0 for unknown qualification id', () => {
+    expect(component.getEmployeeCount(999)).toBe(0);
   });
 });
