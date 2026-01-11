@@ -182,7 +182,11 @@
   background-color: var(--background-secondary);
 }
 .table-wrapper {
-  display: inline-block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 0.6rem;
 }
 
 .qualifications-table th {
@@ -252,4 +256,9 @@
   cursor: pointer;
   height: 26px;
   width: 36px;
+}
+
+.page-footer {
+  font-family: var(--font-primary);
+  color: var(--text-secondary);
 }

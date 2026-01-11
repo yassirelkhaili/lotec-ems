@@ -1,41 +1,55 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormGroup,
+  FormControl,
+  Validators,
+} from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
 import { Qualification } from '../types/Qualification';
 
 @Component({
   selector: 'app-qualifications-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './qualifications-list.component.html',
   styleUrls: ['./qualifications-list.component.css'],
 })
 export class QualificationsListComponent implements OnInit {
-  qualifications$: Observable<Qualification[]>;
-  qualifications: Qualification[] = [];
+  qualifications = signal<Qualification[]>([]);
+  searchTerm = signal<string>('');
+  showForm = signal<boolean>(false);
+  isEditMode = signal<boolean>(false);
+  selectedQualification = signal<Qualification | null>(null);
 
-  // Form data for create/update
-  selectedQualification: Qualification | null = null;
-  qualificationForm = {
-    id: 0,
-    skill: '',
-  };
+  filteredQualifications = computed(() => {
+    const search = this.searchTerm().toLowerCase().trim();
+    if (!search) return this.qualifications();
 
-  isEditMode = false;
-  showForm = false;
+    return this.qualifications().filter((q) =>
+      q.skill.toLowerCase().includes(search)
+    );
+  });
 
-  // TODO: Replace with AuthService when ready
-  // For now: Get token from getBearerToken.http
+  qualificationForm = new FormGroup({
+    id: new FormControl<number>(0),
+    skill: new FormControl('', {
+      validators: [
+        Validators.required,
+        Validators.minLength(2),
+        Validators.maxLength(100),
+      ],
+      nonNullable: true,
+    }),
+  });
+
   private TEMP_TOKEN =
-    'eyJhbGciOiJSUzI1NiIsImtpZCI6ImM0MDc3MzdjMTg1MzQyYTk5Y2VlYzcyMTQwM2I4NjViIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkwMDAvYXBwbGljYXRpb24vby9lbXBsb3llZV9hcGkvIiwic3ViIjoiYjBlMDExYmU0Y2VlYzliOTYwNzA0MDY3ODU0OWJmNzA4M2I5ZjAwNGQ2MGQ2MTU5NTAwNjIwOWYyMmY5NmY1ZCIsImF1ZCI6ImVtcGxveWVlX2FwaV9jbGllbnQiLCJleHAiOjE3NjgwODM1MDYsImlhdCI6MTc2ODA4MDUwNiwiYXV0aF90aW1lIjoxNzY4MDgwNTA2LCJhY3IiOiJnb2F1dGhlbnRpay5pby9wcm92aWRlcnMvb2F1dGgyL2RlZmF1bHQiLCJhenAiOiJlbXBsb3llZV9hcGlfY2xpZW50IiwidWlkIjoiOHU3NGd1SDBjbkthWHhCbVBXaGNxcktnWFpMaDE3SWR4N1V2dzlkMiJ9.OGM5cOBEiiLLR4qp0D2FTGbfhKjo30dZFfxIhoG9DlCaJRWvD7hLZMhV7reRMC0iddi_YzraZqHzoYYqB3OWujvFmbPzeUZ_U24qtkdC0dA9AvFc6DmB-4sOuk0RPHpRky44h2KccquenkYbKRR4M2XIDcOD4mnIkAa573-Lzhupci1GpqaFoa7_As4JaMfp8ddpyU-mlUX-Sv7CUQfq-XJT9Q9PbqYpFXTa-CkD_pZBXU2lT9hnVlNgEHMBNhO9_GqlAhOs6MMjeR6hBktytPhZqd3jeF3CJxyzx3lGeqmPyutvkzjvmOFNUjgh5lDhuQnaengLn5atZiAFcUs7N38hvhGKPSZow0CIcpgad7dvh3OVzogEiIRAyu-_QWYkZTfF9mgWdf5qJjLyAD4CWRSRUo9HyotL-bjIsJMeDXZcVRq4nWkrX34cY00GDrYbfav1vISSZbIAjsWNASIMlhmCEzPqTPv0_EF3wA89tTBF7T9od03GTBc_GdugttziQx57NpUhoUoUobLx8T_4nt_XsWEIOHvnUVrjy4oPp1Osul9TRvsDhZm8fprorM_w_AU1EDi2sU-ZH-VehuIl0rvd6ZC6grV7Dirjyi-isw-Bny4Q1-CPxFFWfJkmaMOkCbd-akw8eSsKvxl3q5jMAJlHbv2sj4FDm2uue_yPIb8';
+    'eyJhbGciOiJSUzI1NiIsImtpZCI6ImM0MDc3MzdjMTg1MzQyYTk5Y2VlYzcyMTQwM2I4NjViIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkwMDAvYXBwbGljYXRpb24vby9lbXBsb3llZV9hcGkvIiwic3ViIjoiYjBlMDExYmU0Y2VlYzliOTYwNzA0MDY3ODU0OWJmNzA4M2I5ZjAwNGQ2MGQ2MTU5NTAwNjIwOWYyMmY5NmY1ZCIsImF1ZCI6ImVtcGxveWVlX2FwaV9jbGllbnQiLCJleHAiOjE3NjgwOTAzNjUsImlhdCI6MTc2ODA4NzM2NSwiYXV0aF90aW1lIjoxNzY4MDg3MzY1LCJhY3IiOiJnb2F1dGhlbnRpay5pby9wcm92aWRlcnMvb2F1dGgyL2RlZmF1bHQiLCJhenAiOiJlbXBsb3llZV9hcGlfY2xpZW50IiwidWlkIjoiYWdaWXJ4dHFwUTR5OHZ0R2RSaXZGN0cyZHFJeXV0TUc2WGVXd3dzNiJ9.gI-OEl5Odhp7d-C_ZJwR8c2gbQ-1YNoasbJFdsuHQ6Cs4pYVSVdc9nRdV7uyhBHRqSfcsAb0FyKv2pMyaBsu0aDjkE1W17buoaPAXPtGI1ICd3O0zv4cjgq1tC3Xx7qHrRQ9DEhFxg0JnaER30zFQWhPjr85JtekfQn6cLb7uO8G9T6ItQEHZHOVNCb70m20uw-cnrKaP8x1NRvuOJRoMmu7svMHPBt9buIqrZW04_xBUzw9cnwK39dY25JiA_3kY6j5MTuT3HAlDVncd1vbXwUjCalBt8Pz0iMTJGHciy-S-yqe3vhnUcGw8MZeQbpBY83hN67mUEucnb2voiqJvD_f9YcffqohL_z6Txdj1Q13KHDA9cAdXgxRkd4unoWNnVK80iXRShxVDwUp6wDSuTeDqvIiIvCxD4UkJuw4s_ncB_Q_v_dcfZzB7oliLH-_ATfdL8ErD2CTAtpGa54I5_a_FV_CakjO6GvCvSUAbGc-GiS4-86XMCzTXVaD230hJ1tq9nhpbZwY7OYR6XpjfERhAxrU2lx0REYOaGzxtFJIIrPuYOrHXx4dm6ANofn4zmvppZibr0X6Kp8UATmhKLgae7fMadg-kvcvHbK8DkOlvS4tN24N91AZm45x5Quyvy14fFqcFPwUKDuko_hvocKfg4uxpj7oOvO1SaXwunI';
 
   private apiUrl = 'http://localhost:8089/qualifications';
 
-  constructor(private http: HttpClient) {
-    this.qualifications$ = new Observable<Qualification[]>();
-  }
+  constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
     this.loadQualifications();
@@ -45,73 +59,74 @@ export class QualificationsListComponent implements OnInit {
    * Load all qualifications from API
    */
   loadQualifications(): void {
-    this.qualifications$ = this.http.get<Qualification[]>(this.apiUrl, {
-      headers: new HttpHeaders().set(
-        'Authorization',
-        `Bearer ${this.TEMP_TOKEN}`
-      ),
-    });
+    this.http
+      .get<Qualification[]>(this.apiUrl, {
+        headers: new HttpHeaders().set(
+          'Authorization',
+          `Bearer ${this.TEMP_TOKEN}`
+        ),
+      })
+      .subscribe({
+        next: (data) => {
+          this.qualifications.set(data);
+        },
+        error: (error) => {
+          console.error('Error loading qualifications:', error);
+          alert('Failed to load qualifications. Check console for details.');
+        },
+      });
+  }
 
-    // Subscribe to update local array for filtering/sorting if needed
-    this.qualifications$.subscribe({
-      next: (data) => {
-        this.qualifications = data;
-      },
-      error: (error) => {
-        console.error('Error loading qualifications:', error);
-        alert('Failed to load qualifications. Check console for details.');
-      },
-    });
+  /**
+   * Search change handler
+   */
+  onSearchChange(value: string): void {
+    this.searchTerm.set(value);
   }
 
   /**
    * Show create form
    */
   showCreateForm(): void {
-    this.isEditMode = false;
-    this.showForm = true;
-    this.qualificationForm = {
-      id: 0,
-      skill: '',
-    };
+    this.isEditMode.set(false);
+    this.showForm.set(true);
+    this.qualificationForm.reset();
   }
 
   /**
    * Show edit form with selected qualification
    */
   editQualification(qualification: Qualification): void {
-    this.isEditMode = true;
-    this.showForm = true;
-    this.selectedQualification = qualification;
-    this.qualificationForm = {
+    this.isEditMode.set(true);
+    this.showForm.set(true);
+    this.selectedQualification.set(qualification);
+    this.qualificationForm.patchValue({
       id: qualification.id,
       skill: qualification.skill,
-    };
+    });
   }
 
   /**
    * Cancel form and hide it
    */
   cancelForm(): void {
-    this.showForm = false;
-    this.selectedQualification = null;
-    this.qualificationForm = {
-      id: 0,
-      skill: '',
-    };
+    this.showForm.set(false);
+    this.selectedQualification.set(null);
+    this.qualificationForm.reset();
   }
 
   /**
    * Create new qualification
    */
   createQualification(): void {
-    if (!this.qualificationForm.skill.trim()) {
-      alert('Please enter a skill');
+    this.qualificationForm.markAllAsTouched();
+
+    if (this.qualificationForm.invalid) {
       return;
     }
 
     const newQualification = {
-      skill: this.qualificationForm.skill,
+      skill: this.qualificationForm.value.skill!,
     };
 
     this.http
@@ -137,23 +152,17 @@ export class QualificationsListComponent implements OnInit {
    * Update existing qualification
    */
   updateQualification(): void {
-    if (!this.qualificationForm.skill.trim()) {
-      alert('Please enter a skill');
+    this.qualificationForm.markAllAsTouched();
+
+    if (this.qualificationForm.invalid) {
       return;
     }
 
-    if (!this.selectedQualification) {
-      return;
-    }
-
-    const updatedQualification = {
-      id: this.qualificationForm.id,
-      skill: this.qualificationForm.skill,
-    };
+    const updatedQualification = this.qualificationForm.getRawValue();
 
     this.http
       .put<Qualification>(
-        `${this.apiUrl}/${this.qualificationForm.id}`,
+        `${this.apiUrl}/${updatedQualification.id}`,
         updatedQualification,
         {
           headers: new HttpHeaders()
@@ -235,10 +244,14 @@ export class QualificationsListComponent implements OnInit {
    * Submit form (create or update)
    */
   onSubmit(): void {
-    if (this.isEditMode) {
+    if (this.isEditMode()) {
       this.updateQualification();
     } else {
       this.createQualification();
     }
+  }
+
+  get skill() {
+    return this.qualificationForm.controls.skill;
   }
 }

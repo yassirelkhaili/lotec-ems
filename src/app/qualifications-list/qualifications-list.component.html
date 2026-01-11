@@ -5,14 +5,17 @@
       Alle Mitarbeiterqualifikationen hier ansehen und verwalten.
     </p>
   </header>
-  <!-- Qualifications List -->
+
   <div class="qualifications-list">
     <div class="list-header">
+      <!-- Search -->
       <div class="list-search">
         <input
           type="text"
           class="list-search-input"
           placeholder="Suche nach Bezeichnung"
+          [value]="searchTerm()"
+          (input)="onSearchChange($any($event.target).value)"
         />
         <button class="list-search-button" type="button">
           <img
@@ -22,63 +25,150 @@
           />
         </button>
       </div>
-      <button class="btn btn-primary">
+
+      <!-- Add Button -->
+      <button class="btn btn-primary" (click)="showCreateForm()">
         <span class="icon">+</span> Neue Qualifikation
       </button>
     </div>
+
+    <!-- Create/Edit Form -->
+    <div class="form-container" *ngIf="showForm()">
+      <div class="form-card">
+        <h2>
+          {{ isEditMode() ? "Qualifikation bearbeiten" : "Neue Qualifikation" }}
+        </h2>
+
+        <form [formGroup]="qualificationForm" (ngSubmit)="onSubmit()">
+          <div class="form-group">
+            <label for="skill">
+              Bezeichnung <span class="required">*</span>
+            </label>
+
+            <input
+              type="text"
+              id="skill"
+              formControlName="skill"
+              class="form-input"
+              [class.error]="skill.invalid && skill.touched"
+              placeholder="z.B. Java Developer"
+            />
+
+            <!-- Fehlermeldungen -->
+            <div class="error-messages" *ngIf="skill.invalid && skill.touched">
+              <small class="error-text" *ngIf="skill.errors?.['required']">
+                Bezeichnung ist erforderlich
+              </small>
+              <small class="error-text" *ngIf="skill.errors?.['minlength']">
+                Mindestens 2 Zeichen erforderlich
+              </small>
+              <small class="error-text" *ngIf="skill.errors?.['maxlength']">
+                Maximal 100 Zeichen erlaubt
+              </small>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="submit"
+              class="btn btn-success"
+              [disabled]="qualificationForm.invalid"
+            >
+              {{ isEditMode() ? "Aktualisieren" : "Erstellen" }}
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              (click)="cancelForm()"
+            >
+              Abbrechen
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- Loading State -->
-    <div *ngIf="(qualifications$ | async) === null" class="loading">
+    <div
+      *ngIf="qualifications().length === 0 && searchTerm() === ''"
+      class="loading"
+    >
       <p class="loading-text">Loading qualifications...</p>
     </div>
-    <!-- Empty State -->
+
+    <!-- Empty State (No Results from Search) -->
     <div
-      *ngIf="qualifications.length === 0 && (qualifications$ | async) !== null"
+      *ngIf="
+        filteredQualifications().length === 0 && qualifications().length > 0
+      "
       class="empty-state"
     >
-      <p>No qualifications found.</p>
-      <button class="btn btn-primary" (click)="showCreateForm()">
-        Create your first qualification
+      <p>Keine Qualifikationen gefunden für "{{ searchTerm() }}"</p>
+      <button class="btn btn-secondary" (click)="searchTerm.set('')">
+        Filter zurücksetzen
       </button>
     </div>
+
+    <!-- Empty State (No Data) -->
+    <div
+      *ngIf="qualifications().length === 0 && searchTerm() === ''"
+      class="empty-state"
+    >
+      <p>Keine Qualifikationen vorhanden.</p>
+      <button class="btn btn-primary" (click)="showCreateForm()">
+        Erste Qualifikation erstellen
+      </button>
+    </div>
+
     <!-- Qualifications Table -->
-    <table class="qualifications-table" *ngIf="qualifications.length > 0">
-      <thead>
-        <tr>
-          <th>Bezeichnung</th>
-          <th>Mitarbeiter</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let qualification of qualifications$ | async">
-          <td>{{ qualification.skill }}</td>
-          <td></td>
-          <td class="actions-cell">
-            <button
-              class="action-icon"
-              (click)="viewEmployees(qualification.id)"
-              title="View employees with this qualification"
-            >
-              <img src="/eye.webp" alt="edit" class="trash-icon" />
-            </button>
-            <button
-              class="action-icon"
-              (click)="editQualification(qualification)"
-              title="Edit qualification"
-            >
-              <img src="/PencilSimpleLine.webp" alt="edit" class="edit-icon" />
-            </button>
-            <button
-              class="action-icon"
-              (click)="deleteQualification(qualification.id)"
-              title="Delete qualification"
-            >
-              <img src="/Trash.webp" alt="edit" class="trash-icon" />
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <span class="page-description">{{ qualifications.length }} Einträge</span>
+    <div class="table-wrapper" *ngIf="filteredQualifications().length > 0">
+      <table class="qualifications-table">
+        <thead>
+          <tr>
+            <th>Bezeichnung</th>
+            <th>Mitarbeiter</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let qualification of filteredQualifications()">
+            <td>{{ qualification.skill }}</td>
+            <td></td>
+            <td class="actions-cell">
+              <button
+                class="action-icon"
+                (click)="viewEmployees(qualification.id)"
+                title="View employees with this qualification"
+              >
+                <img src="/eye.webp" alt="view" class="trash-icon" />
+              </button>
+              <button
+                class="action-icon"
+                (click)="editQualification(qualification)"
+                title="Edit qualification"
+              >
+                <img
+                  src="/PencilSimpleLine.webp"
+                  alt="edit"
+                  class="edit-icon"
+                />
+              </button>
+              <button
+                class="action-icon"
+                (click)="deleteQualification(qualification.id)"
+                title="Delete qualification"
+              >
+                <img src="/Trash.webp" alt="delete" class="trash-icon" />
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <span class="page-footer">
+        {{ filteredQualifications().length }} von
+        {{ qualifications().length }} Einträgen
+      </span>
+    </div>
   </div>
 </div>
