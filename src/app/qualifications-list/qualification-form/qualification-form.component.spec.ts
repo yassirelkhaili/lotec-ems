@@ -19,7 +19,6 @@ describe('QualificationFormComponent', () => {
     fixture = TestBed.createComponent(QualificationFormComponent);
     component = fixture.componentInstance;
 
-    // Create a test form
     component.form = new FormGroup({
       id: new FormControl<number>(0),
       skill: new FormControl('', {
@@ -61,7 +60,7 @@ describe('QualificationFormComponent', () => {
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement;
-    const button = compiled.querySelector('button[type="submit"]');
+    const button = compiled.querySelector('button.btn-success');
 
     expect(button.textContent).toContain('Erstellen');
   });
@@ -71,7 +70,7 @@ describe('QualificationFormComponent', () => {
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement;
-    const button = compiled.querySelector('button[type="submit"]');
+    const button = compiled.querySelector('button.btn-success');
 
     expect(button.textContent).toContain('Aktualisieren');
   });
@@ -81,7 +80,7 @@ describe('QualificationFormComponent', () => {
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement;
-    const button = compiled.querySelector('button[type="submit"]');
+    const button = compiled.querySelector('button.btn-success');
 
     expect(button.disabled).toBe(true);
   });
@@ -91,7 +90,7 @@ describe('QualificationFormComponent', () => {
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement;
-    const button = compiled.querySelector('button[type="submit"]');
+    const button = compiled.querySelector('button.btn-success');
 
     expect(button.disabled).toBe(false);
   });

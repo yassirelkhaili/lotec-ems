@@ -56,10 +56,23 @@ describe('QualificationsListComponent', () => {
 
     req.flush(mockQualifications);
 
+    const empReq1 = httpMock.expectOne(
+      'http://localhost:8089/qualifications/1/employees'
+    );
+    const empReq2 = httpMock.expectOne(
+      'http://localhost:8089/qualifications/2/employees'
+    );
+    const empReq3 = httpMock.expectOne(
+      'http://localhost:8089/qualifications/3/employees'
+    );
+
+    empReq1.flush({ qualification: mockQualifications[0], employees: [] });
+    empReq2.flush({ qualification: mockQualifications[1], employees: [] });
+    empReq3.flush({ qualification: mockQualifications[2], employees: [] });
+
     expect(component.qualifications()).toEqual(mockQualifications);
   });
 
-  // ✅ Updated: Modal tests
   it('should open create modal when openCreateModal is called', () => {
     component.openCreateModal();
 
@@ -116,6 +129,20 @@ describe('QualificationsListComponent', () => {
     const getReq = httpMock.expectOne('http://localhost:8089/qualifications');
     expect(getReq.request.method).toBe('GET');
     getReq.flush(mockQualifications);
+
+    const empReq1 = httpMock.expectOne(
+      'http://localhost:8089/qualifications/1/employees'
+    );
+    const empReq2 = httpMock.expectOne(
+      'http://localhost:8089/qualifications/2/employees'
+    );
+    const empReq3 = httpMock.expectOne(
+      'http://localhost:8089/qualifications/3/employees'
+    );
+
+    empReq1.flush({ qualification: mockQualifications[0], employees: [] });
+    empReq2.flush({ qualification: mockQualifications[1], employees: [] });
+    empReq3.flush({ qualification: mockQualifications[2], employees: [] });
   });
 
   it('should not create qualification with empty skill', () => {
@@ -124,6 +151,7 @@ describe('QualificationsListComponent', () => {
     component.createQualification();
 
     httpMock.expectNone('http://localhost:8089/qualifications');
+    expect(true).toBe(true);
   });
 
   it('should update an existing qualification', () => {
@@ -146,6 +174,20 @@ describe('QualificationsListComponent', () => {
     const getReq = httpMock.expectOne('http://localhost:8089/qualifications');
     expect(getReq.request.method).toBe('GET');
     getReq.flush(mockQualifications);
+
+    const empReq1 = httpMock.expectOne(
+      'http://localhost:8089/qualifications/1/employees'
+    );
+    const empReq2 = httpMock.expectOne(
+      'http://localhost:8089/qualifications/2/employees'
+    );
+    const empReq3 = httpMock.expectOne(
+      'http://localhost:8089/qualifications/3/employees'
+    );
+
+    empReq1.flush({ qualification: mockQualifications[0], employees: [] });
+    empReq2.flush({ qualification: mockQualifications[1], employees: [] });
+    empReq3.flush({ qualification: mockQualifications[2], employees: [] });
   });
 
   it('should delete a qualification after confirmation', () => {
@@ -162,6 +204,20 @@ describe('QualificationsListComponent', () => {
     const getReq = httpMock.expectOne('http://localhost:8089/qualifications');
     expect(getReq.request.method).toBe('GET');
     getReq.flush(mockQualifications);
+
+    const empReq1 = httpMock.expectOne(
+      'http://localhost:8089/qualifications/1/employees'
+    );
+    const empReq2 = httpMock.expectOne(
+      'http://localhost:8089/qualifications/2/employees'
+    );
+    const empReq3 = httpMock.expectOne(
+      'http://localhost:8089/qualifications/3/employees'
+    );
+
+    empReq1.flush({ qualification: mockQualifications[0], employees: [] });
+    empReq2.flush({ qualification: mockQualifications[1], employees: [] });
+    empReq3.flush({ qualification: mockQualifications[2], employees: [] });
   });
 
   it('should submit form in create mode', () => {

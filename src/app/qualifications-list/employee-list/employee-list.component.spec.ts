@@ -37,6 +37,8 @@ describe('EmployeeListComponent', () => {
     fixture = TestBed.createComponent(EmployeeListComponent);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
+
+    component.qualificationId = 1;
   });
 
   afterEach(() => {
@@ -48,11 +50,8 @@ describe('EmployeeListComponent', () => {
   });
 
   it('should load employees and all employees on init', () => {
-    component.qualificationId = 1;
-
     component.ngOnInit();
 
-    // Expect request for employees with this qualification
     const req1 = httpMock.expectOne(
       'http://localhost:8089/qualifications/1/employees'
     );
@@ -60,7 +59,6 @@ describe('EmployeeListComponent', () => {
     expect(req1.request.headers.get('Authorization')).toContain('Bearer');
     req1.flush(mockResponse);
 
-    // Expect request for all employees
     const req2 = httpMock.expectOne('http://localhost:8089/employees');
     expect(req2.request.method).toBe('GET');
     expect(req2.request.headers.get('Authorization')).toContain('Bearer');
@@ -91,7 +89,7 @@ describe('EmployeeListComponent', () => {
     spyOn(component.employeesChanged, 'emit');
     spyOn(window, 'alert');
 
-    component.qualificationId = 1;
+    component.qualificationName.set('Java Developer');
     component.selectedEmployeeId.set(3);
 
     component.addEmployeeToQualification();
@@ -100,13 +98,12 @@ describe('EmployeeListComponent', () => {
       'http://localhost:8089/employees/3/qualifications'
     );
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({ qualificationId: 1 });
+    expect(req.request.body).toEqual({ skill: 'Java Developer' });
     expect(req.request.headers.get('Authorization')).toContain('Bearer');
     expect(req.request.headers.get('Content-Type')).toBe('application/json');
 
     req.flush({});
 
-    // Should reload employees
     const reloadReq = httpMock.expectOne(
       'http://localhost:8089/qualifications/1/employees'
     );
@@ -136,7 +133,7 @@ describe('EmployeeListComponent', () => {
     spyOn(console, 'error');
     spyOn(window, 'alert');
 
-    component.qualificationId = 1;
+    component.qualificationName.set('Java Developer');
     component.selectedEmployeeId.set(3);
 
     component.addEmployeeToQualification();
@@ -161,8 +158,6 @@ describe('EmployeeListComponent', () => {
     spyOn(component.employeesChanged, 'emit');
     spyOn(window, 'alert');
 
-    component.qualificationId = 1;
-
     component.removeEmployeeFromQualification(2);
 
     const req = httpMock.expectOne(
@@ -173,7 +168,6 @@ describe('EmployeeListComponent', () => {
 
     req.flush({});
 
-    // Should reload employees
     const reloadReq = httpMock.expectOne(
       'http://localhost:8089/qualifications/1/employees'
     );
@@ -191,6 +185,7 @@ describe('EmployeeListComponent', () => {
     component.removeEmployeeFromQualification(2);
 
     httpMock.expectNone('http://localhost:8089/employees/2/qualifications/1');
+    expect(true).toBe(true);
   });
 
   it('should handle error when removing employee', () => {
@@ -198,7 +193,6 @@ describe('EmployeeListComponent', () => {
     spyOn(console, 'error');
     spyOn(window, 'alert');
 
-    component.qualificationId = 1;
     component.removeEmployeeFromQualification(2);
 
     const req = httpMock.expectOne(
@@ -216,8 +210,6 @@ describe('EmployeeListComponent', () => {
   });
 
   it('should handle empty employee list', () => {
-    component.qualificationId = 1;
-
     const emptyResponse: QualificationEmployeesResponse = {
       qualification: { id: 1, skill: 'Java Developer' },
       employees: [],
@@ -240,7 +232,6 @@ describe('EmployeeListComponent', () => {
 
   it('should handle HTTP errors when loading employees', () => {
     spyOn(console, 'error');
-    component.qualificationId = 1;
 
     component.ngOnInit();
 
@@ -261,7 +252,6 @@ describe('EmployeeListComponent', () => {
 
   it('should handle HTTP errors when loading all employees', () => {
     spyOn(console, 'error');
-    component.qualificationId = 1;
 
     component.ngOnInit();
 
@@ -280,7 +270,6 @@ describe('EmployeeListComponent', () => {
   });
 
   it('should display loading state initially', () => {
-    component.qualificationId = 1;
     component.isLoading.set(true);
     fixture.detectChanges();
 
@@ -289,11 +278,29 @@ describe('EmployeeListComponent', () => {
 
     expect(loadingText).toBeTruthy();
     expect(loadingText.textContent).toContain('Lade Mitarbeiter');
+
+    const req1 = httpMock.expectOne(
+      'http://localhost:8089/qualifications/1/employees'
+    );
+    const req2 = httpMock.expectOne('http://localhost:8089/employees');
+    req1.flush(mockResponse);
+    req2.flush(mockAllEmployees);
   });
 
   it('should display empty state when no employees have qualification', () => {
     component.isLoading.set(false);
     component.employees.set([]);
+    fixture.detectChanges();
+
+    // Flush HTTP requests triggered by ngOnInit
+    const req1 = httpMock.expectOne(
+      'http://localhost:8089/qualifications/1/employees'
+    );
+    const req2 = httpMock.expectOne('http://localhost:8089/employees');
+    req1.flush({ qualification: { id: 1, skill: 'Test' }, employees: [] });
+    req2.flush(mockAllEmployees);
+
+    // Update DOM with flushed data
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement;
@@ -311,6 +318,15 @@ describe('EmployeeListComponent', () => {
     component.allEmployees.set(mockAllEmployees);
     fixture.detectChanges();
 
+    const req1 = httpMock.expectOne(
+      'http://localhost:8089/qualifications/1/employees'
+    );
+    const req2 = httpMock.expectOne('http://localhost:8089/employees');
+    req1.flush(mockResponse);
+    req2.flush(mockAllEmployees);
+
+    fixture.detectChanges();
+
     const compiled = fixture.nativeElement;
     const employeeItems = compiled.querySelectorAll('.employee-item');
 
@@ -325,14 +341,24 @@ describe('EmployeeListComponent', () => {
     component.allEmployees.set(mockAllEmployees);
     fixture.detectChanges();
 
-    const compiled = fixture.nativeElement;
-    const countText = compiled.querySelector('.employee-count');
+    const req1 = httpMock.expectOne(
+      'http://localhost:8089/qualifications/1/employees'
+    );
+    const req2 = httpMock.expectOne('http://localhost:8089/employees');
+    req1.flush(mockResponse);
+    req2.flush(mockAllEmployees);
 
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement;
+    const countText = compiled.querySelector('.info-text');
+
+    expect(countText).toBeTruthy();
     expect(countText.textContent).toContain('2 Mitarbeiter');
   });
 
   it('should set isAddingEmployee during add operation', () => {
-    component.qualificationId = 1;
+    component.qualificationName.set('Java Developer');
     component.selectedEmployeeId.set(3);
 
     expect(component.isAddingEmployee()).toBe(false);
