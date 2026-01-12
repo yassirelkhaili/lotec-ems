@@ -1,4 +1,4 @@
-<form [formGroup]="form">
+<form>
   <div class="form-group">
     <label for="skill">
       Bezeichnung <span class="required">*</span>
@@ -7,34 +7,31 @@
     <input 
       type="text" 
       id="skill" 
-      formControlName="skill"
+      [value]="skill()"
+      (input)="onSkillChange($any($event.target).value)"
+      (blur)="onSkillBlur()"
       class="form-input"
-      [class.error]="skill?.invalid && skill?.touched"
+      [class.error]="touched() && error()"
       placeholder="z.B. Java Developer"
     />
-
-    <p class="page-description"> {{ isEdit ? 'Ändern Sie die Bezeichnung der Qualifikation' : 'Geben Sie die Bezeichnung der Qualifikation ein' }}</p>
+    <p class="page-description">
+      {{ isEdit ? 'Ändern Sie die Bezeichnung der Qualifikation' : 'Geben Sie die Bezeichnung der Qualifikation ein' }}
+    </p>
     
-    <div class="error-messages" *ngIf="skill?.invalid && skill?.touched">
-      <small class="error-text" *ngIf="skill?.errors?.['required']">
-        Bezeichnung ist erforderlich
-      </small>
-      <small class="error-text" *ngIf="skill?.errors?.['minlength']">
-        Mindestens 2 Zeichen erforderlich
-      </small>
-      <small class="error-text" *ngIf="skill?.errors?.['maxlength']">
-        Maximal 100 Zeichen erlaubt
+    <div class="error-messages" *ngIf="touched() && error()">
+      <small class="error-text">
+        {{ error() }}
       </small>
     </div>
   </div>
-
+  
   <p class="form-required-notice"><span>*</span> Pflichtfeld</p>
-
+  
   <div class="modal-actions">
     <button 
       type="button" 
       class="btn btn-success"
-      [disabled]="form.invalid"
+      [disabled]="!isValid()"
       (click)="onSubmit()"
     >
       {{ isEdit ? 'Aktualisieren' : 'Erstellen' }}

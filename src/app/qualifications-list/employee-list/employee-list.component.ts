@@ -46,7 +46,7 @@ export class EmployeeListComponent implements OnInit {
 
   // TODO: Replace with AuthService (Marouane)
   private TEMP_TOKEN =
-    'eyJhbGciOiJSUzI1NiIsImtpZCI6ImM0MDc3MzdjMTg1MzQyYTk5Y2VlYzcyMTQwM2I4NjViIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkwMDAvYXBwbGljYXRpb24vby9lbXBsb3llZV9hcGkvIiwic3ViIjoiYjBlMDExYmU0Y2VlYzliOTYwNzA0MDY3ODU0OWJmNzA4M2I5ZjAwNGQ2MGQ2MTU5NTAwNjIwOWYyMmY5NmY1ZCIsImF1ZCI6ImVtcGxveWVlX2FwaV9jbGllbnQiLCJleHAiOjE3NjgxNjYyNTEsImlhdCI6MTc2ODE2MzI1MSwiYXV0aF90aW1lIjoxNzY4MTYzMjUxLCJhY3IiOiJnb2F1dGhlbnRpay5pby9wcm92aWRlcnMvb2F1dGgyL2RlZmF1bHQiLCJhenAiOiJlbXBsb3llZV9hcGlfY2xpZW50IiwidWlkIjoiRVg3em84UGJLSTZmZW1wN01VUDg3QzQyanduWWRkRHRUc0VKMXV2VyJ9.XlvibOz_B8IKqb2USQLYOOoZPuBvO7-hFzfVNPsydLnperwqXqtDj3r_VJCbdR9o1w4fczqzJJvZ-2xgwvj1unaVJqY11nyHss-hUko333mxbQTXuHlkL8Kpq6sYsMiE8-XH2rGdp--cmlqZARXdpowqFPIxf51e8sKm0ygeFdEcSv6lMluP1vSojc_0UEyHxOOsFKfB8NLZ5XokBnt2TO8BHhw48l6b2xEcfd5n5R9fz9O0xNiD4MF8o3GWQwbwKmBZ12FNz4j9jvuP0Y1Ghjj9OgTh4Midf3pYX0ICoTIytRx9Fi0VDXJLNorQZG2rb2K7ldpnEvsVyYhVc-GYih9KYXtSmoS8pUMnbDqt_OmaYUFblIPI8d5q82QMTjFDEYIVVox9lGZ3gy8jx5kueCYdGmVMjHmXQEQORcuW1VJTi10WXx3hw_zm-XJiS_mpRFDcxrrZpaNMFCHHaapFkMs-JkfjmMi_6lK3J3RvFI9VvsUVbbKCXUbXJ-oD0HcbJFvmQ8BslEGHPNyvDVu_jYvycFFDDWY2Sm1ipQ6IteA-MA9rybIrpsK9c3ELMDn9liQpwN66vdVOzD9WnJ0wtaNnNGw0fapjECRYG2dRfV2QzkhXN-klyWkHr5u4h942uykLmDo38s6WPytV3r_xv8xji_bzFrR4o2ejQBBPppY';
+    'eyJhbGciOiJSUzI1NiIsImtpZCI6ImM0MDc3MzdjMTg1MzQyYTk5Y2VlYzcyMTQwM2I4NjViIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkwMDAvYXBwbGljYXRpb24vby9lbXBsb3llZV9hcGkvIiwic3ViIjoiYjBlMDExYmU0Y2VlYzliOTYwNzA0MDY3ODU0OWJmNzA4M2I5ZjAwNGQ2MGQ2MTU5NTAwNjIwOWYyMmY5NmY1ZCIsImF1ZCI6ImVtcGxveWVlX2FwaV9jbGllbnQiLCJleHAiOjE3NjgyMzEyNjMsImlhdCI6MTc2ODIyODI2MywiYXV0aF90aW1lIjoxNzY4MjI4MjYzLCJhY3IiOiJnb2F1dGhlbnRpay5pby9wcm92aWRlcnMvb2F1dGgyL2RlZmF1bHQiLCJhenAiOiJlbXBsb3llZV9hcGlfY2xpZW50IiwidWlkIjoickoxZk9RUjBNd1V2OHdVV2JXSXRUYmtvc0VEMEpTR0w2ZUJvVXliRiJ9.UClzkgBMTm1VUtpw5sU8F5NmKIfKjZHx688bfCyiFL4NUtLiURSlBLoUtxEievaksoMxGVqRhg9On_p60qF6_RYhR4fK6PMojys5VvUNOcjGjUPCFK4SCF5YAJRWbcbX-7Epm5-quMIiVAoVQX3aKkyDneMCJ7LOPNoMDTvMpZCuW_SyvHTxEdp3N9rU9HlDHsCDl2khaAyp-iclVBzurCbP2TqneljgT3SrcQPq9k8EzbNmY2F1jm38wKbaLdh6nkVJVMJOcHFDUChR_MRmfdfM-oeRia6yU6C4tAQRKERVR6FANmSdSCcgUh9OwrHZJoYHN8Gu3jdDYvcwKY6azZqDNxYPpXkWfIVEaKzP8RPkyeUQW7OmAG8xhqQI81l_wYGKva6_qu-3LNtPB7BL7wrrm7Ez6kQ0lAf7fr2RDFWI6Rx2JNUWU-Zymckp-XCuOLr12FffrgqNCMufb3v_OUqqXD-iUtAtcEGD9gdMPwdiYGLHVhfeJk-CQzAKmjRgblXgWu0zgMDQ8eS0gF_uqdgznBZAKzavEKg6LrCKm6Am_AiJkrS9_VzbLDC30dgeOsfsAWvyU7WO9ohAXEN4ygluyMvdHS3hDuG0AI-eVopqyrSsccvMXuZG_0WKnTlQlh3tWt9YjUjf0wt4Tga0g9RgPJMuJXPEmmK51qMESfI';
   private qualificationsApiUrl = 'http://localhost:8089/qualifications';
   private employeesApiUrl = 'http://localhost:8089/employees';
 
@@ -58,7 +58,7 @@ export class EmployeeListComponent implements OnInit {
   }
 
   /**
-   * Lade Employees mit dieser Qualifikation
+   * load employees with qualification
    */
   private loadEmployees(): void {
     this.isLoading.set(true);
@@ -87,7 +87,7 @@ export class EmployeeListComponent implements OnInit {
   }
 
   /**
-   * Lade alle verfügbaren Employees
+   * load available employees
    */
   private loadAllEmployees(): void {
     this.http
@@ -108,7 +108,7 @@ export class EmployeeListComponent implements OnInit {
   }
 
   /**
-   * Füge Employee zur Qualifikation hinzu
+   * add employee to qualification
    */
   addEmployeeToQualification(): void {
     const employeeId = this.selectedEmployeeId();
@@ -148,7 +148,7 @@ export class EmployeeListComponent implements OnInit {
   }
 
   /**
-   * Entferne Employee von Qualifikation
+   * Delete employee from qualification
    */
   removeEmployeeFromQualification(employeeId: number): void {
     if (

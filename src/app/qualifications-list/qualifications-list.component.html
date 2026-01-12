@@ -55,16 +55,24 @@
         <div class="modal-body">
           @switch (modalType()) { @case ('create') {
           <app-qualification-form
-            [form]="qualificationForm"
+            [skill]="formSkill"
+            [error]="formError"
+            [touched]="formTouched"
+            [isValid]="isFormValid"
             (submit)="createQualification()"
             (cancel)="closeModal()"
+            (validate)="validateForm()"
           />
           } @case ('edit') {
           <app-qualification-form
-            [form]="qualificationForm"
+            [skill]="formSkill"
+            [error]="formError"
+            [touched]="formTouched"
+            [isValid]="isFormValid"
             [isEdit]="true"
             (submit)="updateQualification()"
             (cancel)="closeModal()"
+            (validate)="validateForm()"
           />
           } @case ('delete') {
           <p class="info-text">
@@ -74,7 +82,10 @@
           <p class="info-text">
             <span>⚠️</span>
             Diese Aktion kann nicht rückgängig gemacht werden. Die Qualifikation
-            wird von allen Mitarbeitern entfernt ({{ getEmployeeCount(selectedQualification()?.id!) }} betroffen).
+            wird von allen Mitarbeitern entfernt ({{
+              getEmployeeCount(selectedQualification()?.id!)
+            }}
+            betroffen).
           </p>
           <div class="modal-actions">
             <button class="btn btn-danger" (click)="confirmDelete()">
