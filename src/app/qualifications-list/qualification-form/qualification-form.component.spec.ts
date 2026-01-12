@@ -1,10 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import {
-  ReactiveFormsModule,
-  FormGroup,
-  FormControl,
-  Validators,
-} from '@angular/forms';
+import { signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { QualificationFormComponent } from './qualification-form.component';
 
 describe('QualificationFormComponent', () => {
@@ -13,23 +9,20 @@ describe('QualificationFormComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [QualificationFormComponent, ReactiveFormsModule],
+      imports: [QualificationFormComponent, FormsModule],
     }).compileComponents();
 
     fixture = TestBed.createComponent(QualificationFormComponent);
     component = fixture.componentInstance;
 
-    component.form = new FormGroup({
-      id: new FormControl<number>(0),
-      skill: new FormControl('', {
-        validators: [
-          Validators.required,
-          Validators.minLength(2),
-          Validators.maxLength(100),
-        ],
-        nonNullable: true,
-      }),
-    });
+    // Set up signal inputs
+    component.skill = signal('');
+    component.error = signal(null);
+    component.touched = signal(false);
+    component.isValid = () => {
+      const skill = component.skill().trim();
+      return skill.length >= 2 && skill.length <= 50;
+    };
 
     fixture.detectChanges();
   });
@@ -41,7 +34,7 @@ describe('QualificationFormComponent', () => {
   it('should emit submit event when form is submitted', () => {
     spyOn(component.submit, 'emit');
 
-    component.form.patchValue({ skill: 'Test Skill' });
+    component.skill.set('Test Skill');
     component.onSubmit();
 
     expect(component.submit.emit).toHaveBeenCalled();
@@ -76,7 +69,7 @@ describe('QualificationFormComponent', () => {
   });
 
   it('should disable submit button when form is invalid', () => {
-    component.form.patchValue({ skill: '' });
+    component.skill.set('');
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement;
@@ -86,7 +79,7 @@ describe('QualificationFormComponent', () => {
   });
 
   it('should enable submit button when form is valid', () => {
-    component.form.patchValue({ skill: 'Valid Skill' });
+    component.skill.set('Valid Skill');
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement;
@@ -95,10 +88,9 @@ describe('QualificationFormComponent', () => {
     expect(button.disabled).toBe(false);
   });
 
-  it('should show error message when skill is required and touched', () => {
-    const skillControl = component.form.get('skill');
-    skillControl?.markAsTouched();
-    skillControl?.setValue('');
+  it('should show error message when touched and has error', () => {
+    component.touched.set(true);
+    component.error.set('Bezeichnung ist erforderlich');
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement;
@@ -108,24 +100,18 @@ describe('QualificationFormComponent', () => {
     expect(errorText.textContent).toContain('Bezeichnung ist erforderlich');
   });
 
-  it('should show error message when skill is too short', () => {
-    const skillControl = component.form.get('skill');
-    skillControl?.markAsTouched();
-    skillControl?.setValue('A');
-    fixture.detectChanges();
+  it('should emit validate event on blur', () => {
+    spyOn(component.validate, 'emit');
 
-    const compiled = fixture.nativeElement;
-    const errorText = compiled.querySelector('.error-text');
+    component.onSkillBlur();
 
-    expect(errorText).toBeTruthy();
-    expect(errorText.textContent).toContain(
-      'Mindestens 2 Zeichen erforderlich'
-    );
+    expect(component.validate.emit).toHaveBeenCalled();
+    expect(component.touched()).toBe(true);
   });
 
-  it('should get skill control', () => {
-    const skill = component.skill;
+  it('should update skill value on input change', () => {
+    component.onSkillChange('New Skill');
 
-    expect(skill).toBe(component.form.get('skill'));
+    expect(component.skill()).toBe('New Skill');
   });
 });

@@ -1,11 +1,5 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  ReactiveFormsModule,
-  FormGroup,
-  FormControl,
-  Validators,
-} from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Qualification } from '../types/Qualification';
 import { forkJoin } from 'rxjs';
@@ -16,12 +10,7 @@ import { QualificationFormComponent } from './qualification-form/qualification-f
 @Component({
   selector: 'app-qualifications-list',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    QualificationFormComponent,
-    EmployeeListComponent,
-  ],
+  imports: [CommonModule, QualificationFormComponent, EmployeeListComponent],
   templateUrl: './qualifications-list.component.html',
   styleUrls: ['./qualifications-list.component.css'],
 })
@@ -32,6 +21,12 @@ export class QualificationsListComponent implements OnInit {
   modalType = signal<'create' | 'edit' | 'delete' | 'view' | null>(null);
   selectedQualification = signal<Qualification | null>(null);
   employeeCounts = signal<Map<number, number>>(new Map());
+
+  // Signal Form State
+  formSkill = signal<string>('');
+  formId = signal<number>(0);
+  formTouched = signal<boolean>(false);
+  formError = signal<string | null>(null);
 
   // Computed Signals
   isModalOpen = computed(() => this.modalType() !== null);
@@ -45,29 +40,39 @@ export class QualificationsListComponent implements OnInit {
     );
   });
 
-  // Form
-  qualificationForm = new FormGroup({
-    id: new FormControl<number>(0),
-    skill: new FormControl('', {
-      validators: [
-        Validators.required,
-        Validators.minLength(2),
-        Validators.maxLength(100),
-      ],
-      nonNullable: true,
-    }),
+  isFormValid = computed(() => {
+    const skill = this.formSkill().trim();
+    return skill.length >= 2 && skill.length <= 50;
   });
 
   // TODO: Replace with AuthService (Marouane)
   private TEMP_TOKEN =
-    'eyJhbGciOiJSUzI1NiIsImtpZCI6ImM0MDc3MzdjMTg1MzQyYTk5Y2VlYzcyMTQwM2I4NjViIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkwMDAvYXBwbGljYXRpb24vby9lbXBsb3llZV9hcGkvIiwic3ViIjoiYjBlMDExYmU0Y2VlYzliOTYwNzA0MDY3ODU0OWJmNzA4M2I5ZjAwNGQ2MGQ2MTU5NTAwNjIwOWYyMmY5NmY1ZCIsImF1ZCI6ImVtcGxveWVlX2FwaV9jbGllbnQiLCJleHAiOjE3NjgyMjAzNTUsImlhdCI6MTc2ODIxNzM1NSwiYXV0aF90aW1lIjoxNzY4MjE3MzU1LCJhY3IiOiJnb2F1dGhlbnRpay5pby9wcm92aWRlcnMvb2F1dGgyL2RlZmF1bHQiLCJhenAiOiJlbXBsb3llZV9hcGlfY2xpZW50IiwidWlkIjoienBQYmVwelpoVmZ0b3NzSnNWcVczU2wzQ0lucnNSb3N1RUlpTmpQdCJ9.P0eyahVs8UJAk5RZ062UanY1QokXUS2eRHOWH6KWHU06kUI45aYprmdo5hBOINpnXdYhfqBCHDpgSCCI0BCxkb2juQdHSAfl_VkrGDfZmxXCAecd6It-VCGpHd6r_8EKC_sSn9NgIbUU8pNZ-ZrwliZc9zlZJHFu9MyPmsl5X4yPS_RSttQl5k_UVOw4OQVJboF-Ea0uvli-kaJX-vr_ACrJgaLxpPrS5F3rsnsdm5hdOV6PEg_ZpLLwzwPmevAOM9RogIrn4exqE2mtDZ91-KdtJSrDyZAzPDa1pGJWvPkAYI7_db15O-X6qwAp4AMbU71tnXH7o8nPN4zf87E3aLrQsshOHtutuVBXN8B8zZvPNvLpWQBumH6219BZQwnwweMe5Qf2TpPzblT4OK-QbnSR85qDnJM2AwMhbgDo-HPHySEqzMi4F1xAfY7jv8UYGThBWEZKsNzv8vtzeAJ8jfJYRRvIqNtvNBObb6jNBWnnNytGBqHeGOGoaT4B1_Kk9cjyDzHLi4qiwFdeieZrAkqCetO0GC4zRcDD1TTzq4CatxmViyHXsLTkQUibI60vSsmxPX6E7U7K63LU4a8NMja4RpCnvKnzFVGnuF9YYVnGFXGoG2VJo0ib-lvn3XEvdg5_5wJGUsS7YVqfeVYE3E5wJm6rnJwfGT0uK2SJzD4';
+    'eyJhbGciOiJSUzI1NiIsImtpZCI6ImM0MDc3MzdjMTg1MzQyYTk5Y2VlYzcyMTQwM2I4NjViIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkwMDAvYXBwbGljYXRpb24vby9lbXBsb3llZV9hcGkvIiwic3ViIjoiYjBlMDExYmU0Y2VlYzliOTYwNzA0MDY3ODU0OWJmNzA4M2I5ZjAwNGQ2MGQ2MTU5NTAwNjIwOWYyMmY5NmY1ZCIsImF1ZCI6ImVtcGxveWVlX2FwaV9jbGllbnQiLCJleHAiOjE3NjgyMzEyNjMsImlhdCI6MTc2ODIyODI2MywiYXV0aF90aW1lIjoxNzY4MjI4MjYzLCJhY3IiOiJnb2F1dGhlbnRpay5pby9wcm92aWRlcnMvb2F1dGgyL2RlZmF1bHQiLCJhenAiOiJlbXBsb3llZV9hcGlfY2xpZW50IiwidWlkIjoickoxZk9RUjBNd1V2OHdVV2JXSXRUYmtvc0VEMEpTR0w2ZUJvVXliRiJ9.UClzkgBMTm1VUtpw5sU8F5NmKIfKjZHx688bfCyiFL4NUtLiURSlBLoUtxEievaksoMxGVqRhg9On_p60qF6_RYhR4fK6PMojys5VvUNOcjGjUPCFK4SCF5YAJRWbcbX-7Epm5-quMIiVAoVQX3aKkyDneMCJ7LOPNoMDTvMpZCuW_SyvHTxEdp3N9rU9HlDHsCDl2khaAyp-iclVBzurCbP2TqneljgT3SrcQPq9k8EzbNmY2F1jm38wKbaLdh6nkVJVMJOcHFDUChR_MRmfdfM-oeRia6yU6C4tAQRKERVR6FANmSdSCcgUh9OwrHZJoYHN8Gu3jdDYvcwKY6azZqDNxYPpXkWfIVEaKzP8RPkyeUQW7OmAG8xhqQI81l_wYGKva6_qu-3LNtPB7BL7wrrm7Ez6kQ0lAf7fr2RDFWI6Rx2JNUWU-Zymckp-XCuOLr12FffrgqNCMufb3v_OUqqXD-iUtAtcEGD9gdMPwdiYGLHVhfeJk-CQzAKmjRgblXgWu0zgMDQ8eS0gF_uqdgznBZAKzavEKg6LrCKm6Am_AiJkrS9_VzbLDC30dgeOsfsAWvyU7WO9ohAXEN4ygluyMvdHS3hDuG0AI-eVopqyrSsccvMXuZG_0WKnTlQlh3tWt9YjUjf0wt4Tga0g9RgPJMuJXPEmmK51qMESfI';
 
   private apiUrl = 'http://localhost:8089/qualifications';
+  private employeesApiUrl = 'http://localhost:8089/employees';
 
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
     this.loadQualifications();
+  }
+
+  /**
+   * Validate form
+   */
+  validateForm(): void {
+    const skill = this.formSkill().trim();
+
+    if (!skill) {
+      this.formError.set('Bezeichnung ist erforderlich');
+    } else if (skill.length < 2) {
+      this.formError.set('Mindestens 2 Zeichen erforderlich');
+    } else if (skill.length > 50) {
+      this.formError.set('Maximal 50 Zeichen erlaubt');
+    } else {
+      this.formError.set(null);
+    }
   }
 
   /**
@@ -151,7 +156,10 @@ export class QualificationsListComponent implements OnInit {
    */
   openCreateModal(): void {
     this.modalType.set('create');
-    this.qualificationForm.reset();
+    this.formSkill.set('');
+    this.formId.set(0);
+    this.formTouched.set(false);
+    this.formError.set(null);
     document.body.classList.add('modal-open');
   }
 
@@ -161,10 +169,10 @@ export class QualificationsListComponent implements OnInit {
   openEditModal(qualification: Qualification): void {
     this.modalType.set('edit');
     this.selectedQualification.set(qualification);
-    this.qualificationForm.patchValue({
-      id: qualification.id,
-      skill: qualification.skill,
-    });
+    this.formSkill.set(qualification.skill);
+    this.formId.set(qualification.id);
+    this.formTouched.set(false);
+    this.formError.set(null);
     document.body.classList.add('modal-open');
   }
 
@@ -192,7 +200,10 @@ export class QualificationsListComponent implements OnInit {
   closeModal(): void {
     this.modalType.set(null);
     this.selectedQualification.set(null);
-    this.qualificationForm.reset();
+    this.formSkill.set('');
+    this.formId.set(0);
+    this.formTouched.set(false);
+    this.formError.set(null);
     document.body.classList.remove('modal-open');
   }
 
@@ -211,14 +222,15 @@ export class QualificationsListComponent implements OnInit {
    * Create new qualification
    */
   createQualification(): void {
-    this.qualificationForm.markAllAsTouched();
+    this.formTouched.set(true);
+    this.validateForm();
 
-    if (this.qualificationForm.invalid) {
+    if (!this.isFormValid() || this.formError()) {
       return;
     }
 
     const newQualification = {
-      skill: this.qualificationForm.value.skill!,
+      skill: this.formSkill().trim(),
     };
 
     this.http
@@ -235,7 +247,17 @@ export class QualificationsListComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error creating qualification:', error);
-          alert('Fehler beim Erstellen der Qualifikation.');
+
+          if (
+            error.status === 500 &&
+            error.error?.message?.includes('duplicate key')
+          ) {
+            alert(
+              `Die Qualifikation "${this.formSkill().trim()}" existiert bereits!`
+            );
+          } else {
+            alert('Fehler beim Erstellen der Qualifikation.');
+          }
         },
       });
   }
@@ -244,13 +266,17 @@ export class QualificationsListComponent implements OnInit {
    * Update existing qualification
    */
   updateQualification(): void {
-    this.qualificationForm.markAllAsTouched();
+    this.formTouched.set(true);
+    this.validateForm();
 
-    if (this.qualificationForm.invalid) {
+    if (!this.isFormValid() || this.formError()) {
       return;
     }
 
-    const updatedQualification = this.qualificationForm.getRawValue();
+    const updatedQualification = {
+      id: this.formId(),
+      skill: this.formSkill().trim(),
+    };
 
     this.http
       .put<Qualification>(
@@ -270,7 +296,17 @@ export class QualificationsListComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error updating qualification:', error);
-          alert('Fehler beim Aktualisieren der Qualifikation.');
+
+          if (
+            error.status === 500 &&
+            error.error?.message?.includes('duplicate key')
+          ) {
+            alert(
+              `Die Qualifikation "${this.formSkill().trim()}" existiert bereits!`
+            );
+          } else {
+            alert('Fehler beim Aktualisieren der Qualifikation.');
+          }
         },
       });
   }
@@ -279,9 +315,71 @@ export class QualificationsListComponent implements OnInit {
    * Delete qualification (called from delete modal)
    */
   confirmDelete(): void {
-    const id = this.selectedQualification()?.id;
-    if (!id) return;
+    const qualification = this.selectedQualification();
+    if (!qualification) return;
 
+    const employeeCount = this.getEmployeeCount(qualification.id);
+
+    // Step 1: If employees have this qualification, remove it from them first
+    if (employeeCount > 0) {
+      // Get employees with this qualification
+      this.http
+        .get<QualificationEmployeesResponse>(
+          `${this.apiUrl}/${qualification.id}/employees`,
+          {
+            headers: new HttpHeaders().set(
+              'Authorization',
+              `Bearer ${this.TEMP_TOKEN}`
+            ),
+          }
+        )
+        .subscribe({
+          next: (response) => {
+            // Remove qualification from each employee
+            const removeRequests = response.employees.map((employee) =>
+              this.http.delete(
+                `${this.employeesApiUrl}/${employee.id}/qualifications/${qualification.id}`,
+                {
+                  headers: new HttpHeaders().set(
+                    'Authorization',
+                    `Bearer ${this.TEMP_TOKEN}`
+                  ),
+                }
+              )
+            );
+
+            // Wait for all removals to complete
+            forkJoin(removeRequests).subscribe({
+              next: () => {
+                // Step 2: Now delete the qualification itself
+                this.deleteQualification(qualification.id);
+              },
+              error: (error) => {
+                console.error(
+                  'Error removing qualification from employees:',
+                  error
+                );
+                alert(
+                  'Fehler beim Entfernen der Qualifikation von Mitarbeitern.'
+                );
+              },
+            });
+          },
+          error: (error) => {
+            console.error('Error loading employees for deletion:', error);
+            alert('Fehler beim Laden der Mitarbeiter.');
+          },
+        });
+    } else {
+      // No employees have this qualification, delete directly
+      this.deleteQualification(qualification.id);
+    }
+  }
+
+  /**
+   * Actually delete the qualification after employees are cleaned up
+   */
+  private deleteQualification(id: number): void {
     this.http
       .delete(`${this.apiUrl}/${id}`, {
         headers: new HttpHeaders().set(
@@ -297,26 +395,20 @@ export class QualificationsListComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error deleting qualification:', error);
-          alert('Fehler beim Löschen der Qualifikation.');
+
+          // Better error handling
+          if (error.status === 403) {
+            alert(
+              'Die Qualifikation ist noch in Verwendung und kann nicht gelöscht werden.'
+            );
+          } else if (error.status === 500) {
+            alert(
+              'Serverfehler beim Löschen der Qualifikation. Bitte versuchen Sie es erneut.'
+            );
+          } else {
+            alert('Fehler beim Löschen der Qualifikation.');
+          }
         },
       });
-  }
-
-  /**
-   * Submit form (create or update based on modal type)
-   */
-  onSubmit(): void {
-    if (this.modalType() === 'edit') {
-      this.updateQualification();
-    } else if (this.modalType() === 'create') {
-      this.createQualification();
-    }
-  }
-
-  /**
-   * Form control getter for template
-   */
-  get skill() {
-    return this.qualificationForm.controls.skill;
   }
 }

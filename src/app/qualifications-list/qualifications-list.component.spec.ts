@@ -1,343 +1,319 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import {
-  HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
-import { provideHttpClient } from '@angular/common/http';
-import { ReactiveFormsModule } from '@angular/forms';
-import { QualificationsListComponent } from './qualifications-list.component';
+import { Component, OnInit, signal, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Qualification } from '../types/Qualification';
+import { forkJoin } from 'rxjs';
 import { QualificationEmployeesResponse } from '../types/QualificationEmployeeResponse';
+import { EmployeeListComponent } from './employee-list/employee-list.component';
+import { QualificationFormComponent } from './qualification-form/qualification-form.component';
 
-describe('QualificationsListComponent', () => {
-  let component: QualificationsListComponent;
-  let fixture: ComponentFixture<QualificationsListComponent>;
-  let httpMock: HttpTestingController;
+@Component({
+  selector: 'app-qualifications-list',
+  standalone: true,
+  imports: [CommonModule, QualificationFormComponent, EmployeeListComponent],
+  templateUrl: './qualifications-list.component.html',
+  styleUrls: ['./qualifications-list.component.css'],
+})
+export class QualificationsListComponent implements OnInit {
+  // Signals
+  qualifications = signal<Qualification[]>([]);
+  searchTerm = signal<string>('');
+  modalType = signal<'create' | 'edit' | 'delete' | 'view' | null>(null);
+  selectedQualification = signal<Qualification | null>(null);
+  employeeCounts = signal<Map<number, number>>(new Map());
 
-  const mockQualifications: Qualification[] = [
-    { id: 1, skill: 'Java Developer' },
-    { id: 2, skill: 'Project Manager' },
-    { id: 3, skill: 'Scrum Master' },
-  ];
+  // Signal Form State
+  formSkill = signal<string>('');
+  formId = signal<number>(0);
+  formTouched = signal<boolean>(false);
+  formError = signal<string | null>(null);
 
-  const mockEmployeesResponse: QualificationEmployeesResponse = {
-    qualification: { id: 1, skill: 'Java Developer' },
-    employees: [
-      { id: 1, firstName: 'John', lastName: 'Doe' },
-      { id: 2, firstName: 'Jane', lastName: 'Smith' },
-    ],
-  };
+  // Computed Signals
+  isModalOpen = computed(() => this.modalType() !== null);
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [QualificationsListComponent, ReactiveFormsModule],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
-    }).compileComponents();
+  filteredQualifications = computed(() => {
+    const search = this.searchTerm().toLowerCase().trim();
+    if (!search) return this.qualifications();
 
-    fixture = TestBed.createComponent(QualificationsListComponent);
-    component = fixture.componentInstance;
-    httpMock = TestBed.inject(HttpTestingController);
-  });
-
-  afterEach(() => {
-    httpMock.verify();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  it('should load qualifications on init', () => {
-    component.ngOnInit();
-
-    const req = httpMock.expectOne('http://localhost:8089/qualifications');
-    expect(req.request.method).toBe('GET');
-    expect(req.request.headers.get('Authorization')).toContain('Bearer');
-
-    req.flush(mockQualifications);
-
-    const empReq1 = httpMock.expectOne(
-      'http://localhost:8089/qualifications/1/employees'
+    return this.qualifications().filter((q) =>
+      q.skill.toLowerCase().includes(search)
     );
-    const empReq2 = httpMock.expectOne(
-      'http://localhost:8089/qualifications/2/employees'
-    );
-    const empReq3 = httpMock.expectOne(
-      'http://localhost:8089/qualifications/3/employees'
-    );
-
-    empReq1.flush({ qualification: mockQualifications[0], employees: [] });
-    empReq2.flush({ qualification: mockQualifications[1], employees: [] });
-    empReq3.flush({ qualification: mockQualifications[2], employees: [] });
-
-    expect(component.qualifications()).toEqual(mockQualifications);
   });
 
-  it('should open create modal when openCreateModal is called', () => {
-    component.openCreateModal();
-
-    expect(component.isModalOpen()).toBe(true);
-    expect(component.modalType()).toBe('create');
-    expect(component.qualificationForm.value.skill).toBe('');
+  isFormValid = computed(() => {
+    const skill = this.formSkill().trim();
+    return skill.length >= 2 && skill.length <= 50;
   });
 
-  it('should open edit modal with qualification data when openEditModal is called', () => {
-    const qualification = mockQualifications[0];
+  // TODO: Replace with AuthService (Marouane)
+  private TEMP_TOKEN =
+    'eyJhbGciOiJSUzI1NiIsImtpZCI6ImM0MDc3MzdjMTg1MzQyYTk5Y2VlYzcyMTQwM2I4NjViIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkwMDAvYXBwbGljYXRpb24vby9lbXBsb3llZV9hcGkvIiwic3ViIjoiYjBlMDExYmU0Y2VlYzliOTYwNzA0MDY3ODU0OWJmNzA4M2I5ZjAwNGQ2MGQ2MTU5NTAwNjIwOWYyMmY5NmY1ZCIsImF1ZCI6ImVtcGxveWVlX2FwaV9jbGllbnQiLCJleHAiOjE3NjgyMjAzNTUsImlhdCI6MTc2ODIxNzM1NSwiYXV0aF90aW1lIjoxNzY4MjE3MzU1LCJhY3IiOiJnb2F1dGhlbnRpay5pby9wcm92aWRlcnMvb2F1dGgyL2RlZmF1bHQiLCJhenAiOiJlbXBsb3llZV9hcGlfY2xpZW50IiwidWlkIjoienBQYmVwelpoVmZ0b3NzSnNWcVczU2wzQ0lucnNSb3N1RUlpTmpQdCJ9.P0eyahVs8UJAk5RZ062UanY1QokXUS2eRHOWH6KWHU06kUI45aYprmdo5hBOINpnXdYhfqBCHDpgSCCI0BCxkb2juQdHSAfl_VkrGDfZmxXCAecd6It-VCGpHd6r_8EKC_sSn9NgIbUU8pNZ-ZrwliZc9zlZJHFu9MyPmsl5X4yPS_RSttQl5k_UVOw4OQVJboF-Ea0uvli-kaJX-vr_ACrJgaLxpPrS5F3rsnsdm5hdOV6PEg_ZpLLwzwPmevAOM9RogIrn4exqE2mtDZ91-KdtJSrDyZAzPDa1pGJWvPkAYI7_db15O-X6qwAp4AMbU71tnXH7o8nPN4zf87E3aLrQsshOHtutuVBXN8B8zZvPNvLpWQBumH6219BZQwnwweMe5Qf2TpPzblT4OK-QbnSR85qDnJM2AwMhbgDo-HPHySEqzMi4F1xAfY7jv8UYGThBWEZKsNzv8vtzeAJ8jfJYRRvIqNtvNBObb6jNBWnnNytGBqHeGOGoaT4B1_Kk9cjyDzHLi4qiwFdeieZrAkqCetO0GC4zRcDD1TTzq4CatxmViyHXsLTkQUibI60vSsmxPX6E7U7K63LU4a8NMja4RpCnvKnzFVGnuF9YYVnGFXGoG2VJo0ib-lvn3XEvdg5_5wJGUsS7YVqfeVYE3E5wJm6rnJwfGT0uK2SJzD4';
 
-    component.openEditModal(qualification);
+  private apiUrl = 'http://localhost:8089/qualifications';
 
-    expect(component.isModalOpen()).toBe(true);
-    expect(component.modalType()).toBe('edit');
-    expect(component.selectedQualification()).toEqual(qualification);
-    expect(component.qualificationForm.value.skill).toBe(qualification.skill);
-  });
+  constructor(private http: HttpClient) {}
 
-  it('should open delete modal when openDeleteModal is called', () => {
-    const qualification = mockQualifications[0];
+  ngOnInit(): void {
+    this.loadQualifications();
+  }
 
-    component.openDeleteModal(qualification);
+  /**
+   * Validate form
+   */
+  validateForm(): void {
+    const skill = this.formSkill().trim();
 
-    expect(component.isModalOpen()).toBe(true);
-    expect(component.modalType()).toBe('delete');
-    expect(component.selectedQualification()).toEqual(qualification);
-  });
+    if (!skill) {
+      this.formError.set('Bezeichnung ist erforderlich');
+    } else if (skill.length < 2) {
+      this.formError.set('Mindestens 2 Zeichen erforderlich');
+    } else if (skill.length > 50) {
+      this.formError.set('Maximal 50 Zeichen erlaubt');
+    } else {
+      this.formError.set(null);
+    }
+  }
 
-  it('should close modal and reset data when closeModal is called', () => {
-    component.modalType.set('create');
-    component.qualificationForm.patchValue({ skill: 'Test' });
+  /**
+   * Load all qualifications AND their employee counts
+   */
+  loadQualifications(): void {
+    this.http
+      .get<Qualification[]>(this.apiUrl, {
+        headers: new HttpHeaders().set(
+          'Authorization',
+          `Bearer ${this.TEMP_TOKEN}`
+        ),
+      })
+      .subscribe({
+        next: (data) => {
+          this.qualifications.set(data);
+          this.loadEmployeeCounts(data);
+        },
+        error: (error) => {
+          console.error('Error loading qualifications:', error);
+          alert('Failed to load qualifications. Check console for details.');
+        },
+      });
+  }
 
-    component.closeModal();
+  /**
+   * Load employee counts for all qualifications
+   */
+  private loadEmployeeCounts(qualifications: Qualification[]): void {
+    if (qualifications.length === 0) {
+      return;
+    }
 
-    expect(component.isModalOpen()).toBe(false);
-    expect(component.modalType()).toBeNull();
-    expect(component.selectedQualification()).toBeNull();
-    expect(component.qualificationForm.value.skill).toBe('');
-  });
-
-  it('should create a new qualification', () => {
-    component.qualificationForm.patchValue({ skill: 'Backend Developer' });
-    component.createQualification();
-
-    const req = httpMock.expectOne('http://localhost:8089/qualifications');
-    expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({ skill: 'Backend Developer' });
-    expect(req.request.headers.get('Authorization')).toContain('Bearer');
-    expect(req.request.headers.get('Content-Type')).toBe('application/json');
-
-    req.flush({ id: 4, skill: 'Backend Developer' });
-
-    const getReq = httpMock.expectOne('http://localhost:8089/qualifications');
-    expect(getReq.request.method).toBe('GET');
-    getReq.flush(mockQualifications);
-
-    const empReq1 = httpMock.expectOne(
-      'http://localhost:8089/qualifications/1/employees'
-    );
-    const empReq2 = httpMock.expectOne(
-      'http://localhost:8089/qualifications/2/employees'
-    );
-    const empReq3 = httpMock.expectOne(
-      'http://localhost:8089/qualifications/3/employees'
+    const requests = qualifications.map((q) =>
+      this.http.get<QualificationEmployeesResponse>(
+        `${this.apiUrl}/${q.id}/employees`,
+        {
+          headers: new HttpHeaders().set(
+            'Authorization',
+            `Bearer ${this.TEMP_TOKEN}`
+          ),
+        }
+      )
     );
 
-    empReq1.flush({ qualification: mockQualifications[0], employees: [] });
-    empReq2.flush({ qualification: mockQualifications[1], employees: [] });
-    empReq3.flush({ qualification: mockQualifications[2], employees: [] });
-  });
+    forkJoin(requests).subscribe({
+      next: (results) => {
+        const counts = new Map<number, number>();
 
-  it('should not create qualification with empty skill', () => {
-    component.qualificationForm.patchValue({ skill: '' });
+        qualifications.forEach((q, index) => {
+          const employeeCount = results[index].employees.length;
+          counts.set(q.id, employeeCount);
+        });
 
-    component.createQualification();
-
-    httpMock.expectNone('http://localhost:8089/qualifications');
-    expect(true).toBe(true);
-  });
-
-  it('should update an existing qualification', () => {
-    component.selectedQualification.set(mockQualifications[0]);
-    component.qualificationForm.patchValue({
-      id: 1,
-      skill: 'Senior Java Developer',
+        this.employeeCounts.set(counts);
+      },
+      error: (error) => {
+        console.error('Error loading employee counts:', error);
+      },
     });
-    component.modalType.set('edit');
+  }
 
-    component.updateQualification();
+  /**
+   * Get employee count for a qualification
+   */
+  getEmployeeCount(qualificationId: number): number {
+    return this.employeeCounts().get(qualificationId) || 0;
+  }
 
-    const req = httpMock.expectOne('http://localhost:8089/qualifications/1');
-    expect(req.request.method).toBe('PUT');
-    expect(req.request.body.skill).toBe('Senior Java Developer');
-    expect(req.request.headers.get('Authorization')).toContain('Bearer');
+  /**
+   * Search change handler
+   */
+  onSearchChange(value: string): void {
+    this.searchTerm.set(value);
+  }
 
-    req.flush({ id: 1, skill: 'Senior Java Developer' });
+  // ========== MODAL FUNCTIONS ==========
 
-    const getReq = httpMock.expectOne('http://localhost:8089/qualifications');
-    expect(getReq.request.method).toBe('GET');
-    getReq.flush(mockQualifications);
+  /**
+   * Open create modal
+   */
+  openCreateModal(): void {
+    this.modalType.set('create');
+    this.formSkill.set('');
+    this.formId.set(0);
+    this.formTouched.set(false);
+    this.formError.set(null);
+    document.body.classList.add('modal-open');
+  }
 
-    const empReq1 = httpMock.expectOne(
-      'http://localhost:8089/qualifications/1/employees'
-    );
-    const empReq2 = httpMock.expectOne(
-      'http://localhost:8089/qualifications/2/employees'
-    );
-    const empReq3 = httpMock.expectOne(
-      'http://localhost:8089/qualifications/3/employees'
-    );
+  /**
+   * Open edit modal
+   */
+  openEditModal(qualification: Qualification): void {
+    this.modalType.set('edit');
+    this.selectedQualification.set(qualification);
+    this.formSkill.set(qualification.skill);
+    this.formId.set(qualification.id);
+    this.formTouched.set(false);
+    this.formError.set(null);
+    document.body.classList.add('modal-open');
+  }
 
-    empReq1.flush({ qualification: mockQualifications[0], employees: [] });
-    empReq2.flush({ qualification: mockQualifications[1], employees: [] });
-    empReq3.flush({ qualification: mockQualifications[2], employees: [] });
-  });
+  /**
+   * Open delete confirmation modal
+   */
+  openDeleteModal(qualification: Qualification): void {
+    this.modalType.set('delete');
+    this.selectedQualification.set(qualification);
+    document.body.classList.add('modal-open');
+  }
 
-  it('should delete a qualification after confirmation', () => {
-    component.selectedQualification.set(mockQualifications[0]);
+  /**
+   * Open view employees modal
+   */
+  openViewModal(qualification: Qualification): void {
+    this.modalType.set('view');
+    this.selectedQualification.set(qualification);
+    document.body.classList.add('modal-open');
+  }
 
-    component.confirmDelete();
+  /**
+   * Close modal
+   */
+  closeModal(): void {
+    this.modalType.set(null);
+    this.selectedQualification.set(null);
+    this.formSkill.set('');
+    this.formId.set(0);
+    this.formTouched.set(false);
+    this.formError.set(null);
+    document.body.classList.remove('modal-open');
+  }
 
-    const req = httpMock.expectOne('http://localhost:8089/qualifications/1');
-    expect(req.request.method).toBe('DELETE');
-    expect(req.request.headers.get('Authorization')).toContain('Bearer');
+  /**
+   * Handle backdrop click (click outside modal)
+   */
+  onBackdropClick(event: MouseEvent): void {
+    if ((event.target as HTMLElement).classList.contains('modal-backdrop')) {
+      this.closeModal();
+    }
+  }
 
-    req.flush({});
+  // ========== CRUD OPERATIONS ==========
 
-    const getReq = httpMock.expectOne('http://localhost:8089/qualifications');
-    expect(getReq.request.method).toBe('GET');
-    getReq.flush(mockQualifications);
+  /**
+   * Create new qualification
+   */
+  createQualification(): void {
+    this.formTouched.set(true);
+    this.validateForm();
 
-    const empReq1 = httpMock.expectOne(
-      'http://localhost:8089/qualifications/1/employees'
-    );
-    const empReq2 = httpMock.expectOne(
-      'http://localhost:8089/qualifications/2/employees'
-    );
-    const empReq3 = httpMock.expectOne(
-      'http://localhost:8089/qualifications/3/employees'
-    );
+    if (!this.isFormValid() || this.formError()) {
+      return;
+    }
 
-    empReq1.flush({ qualification: mockQualifications[0], employees: [] });
-    empReq2.flush({ qualification: mockQualifications[1], employees: [] });
-    empReq3.flush({ qualification: mockQualifications[2], employees: [] });
-  });
+    const newQualification = {
+      skill: this.formSkill().trim(),
+    };
 
-  it('should submit form in create mode', () => {
-    component.modalType.set('create');
-    component.qualificationForm.patchValue({ skill: 'Test Qualification' });
+    this.http
+      .post<Qualification>(this.apiUrl, newQualification, {
+        headers: new HttpHeaders()
+          .set('Authorization', `Bearer ${this.TEMP_TOKEN}`)
+          .set('Content-Type', 'application/json'),
+      })
+      .subscribe({
+        next: () => {
+          this.loadQualifications();
+          this.closeModal();
+          alert('Qualifikation erfolgreich erstellt!');
+        },
+        error: (error) => {
+          console.error('Error creating qualification:', error);
+          alert('Fehler beim Erstellen der Qualifikation.');
+        },
+      });
+  }
 
-    spyOn(component, 'createQualification');
-    component.onSubmit();
+  /**
+   * Update existing qualification
+   */
+  updateQualification(): void {
+    this.formTouched.set(true);
+    this.validateForm();
 
-    expect(component.createQualification).toHaveBeenCalled();
-  });
+    if (!this.isFormValid() || this.formError()) {
+      return;
+    }
 
-  it('should submit form in edit mode', () => {
-    component.modalType.set('edit');
-    component.selectedQualification.set(mockQualifications[0]);
-    component.qualificationForm.patchValue({
-      id: 1,
-      skill: 'Updated Qualification',
-    });
+    const updatedQualification = {
+      id: this.formId(),
+      skill: this.formSkill().trim(),
+    };
 
-    spyOn(component, 'updateQualification');
-    component.onSubmit();
+    this.http
+      .put<Qualification>(
+        `${this.apiUrl}/${updatedQualification.id}`,
+        updatedQualification,
+        {
+          headers: new HttpHeaders()
+            .set('Authorization', `Bearer ${this.TEMP_TOKEN}`)
+            .set('Content-Type', 'application/json'),
+        }
+      )
+      .subscribe({
+        next: () => {
+          this.loadQualifications();
+          this.closeModal();
+          alert('Qualifikation erfolgreich aktualisiert!');
+        },
+        error: (error) => {
+          console.error('Error updating qualification:', error);
+          alert('Fehler beim Aktualisieren der Qualifikation.');
+        },
+      });
+  }
 
-    expect(component.updateQualification).toHaveBeenCalled();
-  });
+  /**
+   * Delete qualification (called from delete modal)
+   */
+  confirmDelete(): void {
+    const id = this.selectedQualification()?.id;
+    if (!id) return;
 
-  it('should handle HTTP errors when loading qualifications', () => {
-    spyOn(console, 'error');
-    spyOn(window, 'alert');
-
-    component.loadQualifications();
-
-    const req = httpMock.expectOne('http://localhost:8089/qualifications');
-    req.error(new ProgressEvent('error'), {
-      status: 500,
-      statusText: 'Server Error',
-    });
-
-    expect(console.error).toHaveBeenCalled();
-    expect(window.alert).toHaveBeenCalledWith(
-      'Failed to load qualifications. Check console for details.'
-    );
-  });
-
-  it('should handle HTTP errors when creating qualifications', () => {
-    spyOn(console, 'error');
-    spyOn(window, 'alert');
-
-    component.qualificationForm.patchValue({ skill: 'Test' });
-    component.createQualification();
-
-    const req = httpMock.expectOne('http://localhost:8089/qualifications');
-    req.error(new ProgressEvent('error'), {
-      status: 400,
-      statusText: 'Bad Request',
-    });
-
-    expect(console.error).toHaveBeenCalled();
-    expect(window.alert).toHaveBeenCalled();
-  });
-
-  it('should filter qualifications based on search term', () => {
-    component.qualifications.set(mockQualifications);
-
-    component.onSearchChange('Java');
-
-    expect(component.filteredQualifications().length).toBe(1);
-    expect(component.filteredQualifications()[0].skill).toBe('Java Developer');
-  });
-
-  it('should return all qualifications when search term is empty', () => {
-    component.qualifications.set(mockQualifications);
-
-    component.onSearchChange('');
-
-    expect(component.filteredQualifications().length).toBe(3);
-  });
-
-  it('should load employee counts for qualifications', () => {
-    component.qualifications.set(mockQualifications);
-
-    component['loadEmployeeCounts'](mockQualifications);
-
-    const req1 = httpMock.expectOne(
-      'http://localhost:8089/qualifications/1/employees'
-    );
-    const req2 = httpMock.expectOne(
-      'http://localhost:8089/qualifications/2/employees'
-    );
-    const req3 = httpMock.expectOne(
-      'http://localhost:8089/qualifications/3/employees'
-    );
-
-    req1.flush(mockEmployeesResponse);
-    req2.flush({ qualification: mockQualifications[1], employees: [] });
-    req3.flush({
-      qualification: mockQualifications[2],
-      employees: [{ id: 3, firstName: 'Bob', lastName: 'Smith' }],
-    });
-
-    expect(component.getEmployeeCount(1)).toBe(2);
-    expect(component.getEmployeeCount(2)).toBe(0);
-    expect(component.getEmployeeCount(3)).toBe(1);
-  });
-
-  it('should return 0 for unknown qualification id', () => {
-    expect(component.getEmployeeCount(999)).toBe(0);
-  });
-
-  it('should close modal on backdrop click', () => {
-    component.modalType.set('create');
-
-    const mockEvent = {
-      target: document.createElement('div'),
-    } as unknown as MouseEvent;
-
-    (mockEvent.target as HTMLElement).classList.add('modal-backdrop');
-
-    component.onBackdropClick(mockEvent);
-
-    expect(component.isModalOpen()).toBe(false);
-  });
-});
+    this.http
+      .delete(`${this.apiUrl}/${id}`, {
+        headers: new HttpHeaders().set(
+          'Authorization',
+          `Bearer ${this.TEMP_TOKEN}`
+        ),
+      })
+      .subscribe({
+        next: () => {
+          this.loadQualifications();
+          this.closeModal();
+          alert('Qualifikation erfolgreich gelöscht!');
+        },
+        error: (error) => {
+          console.error('Error deleting qualification:', error);
+          alert('Fehler beim Löschen der Qualifikation.');
+        },
+      });
+  }
+}
