@@ -58,7 +58,7 @@ export class EmployeeListComponent implements OnInit {
   }
 
   /**
-   * Lade Employees mit dieser Qualifikation
+   * load employees with qualification
    */
   private loadEmployees(): void {
     this.isLoading.set(true);
@@ -87,7 +87,7 @@ export class EmployeeListComponent implements OnInit {
   }
 
   /**
-   * Lade alle verfügbaren Employees
+   * load available employees
    */
   private loadAllEmployees(): void {
     this.http
@@ -108,7 +108,7 @@ export class EmployeeListComponent implements OnInit {
   }
 
   /**
-   * Füge Employee zur Qualifikation hinzu
+   * add employee to qualification
    */
   addEmployeeToQualification(): void {
     const employeeId = this.selectedEmployeeId();
@@ -148,7 +148,7 @@ export class EmployeeListComponent implements OnInit {
   }
 
   /**
-   * Entferne Employee von Qualifikation
+   * Delete employee from qualification
    */
   removeEmployeeFromQualification(employeeId: number): void {
     if (
