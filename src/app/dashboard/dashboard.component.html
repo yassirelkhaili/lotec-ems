@@ -1,0 +1,17 @@
+<div class="dashboard-container">
+  <app-sidebar [isOpen]="sidebarOpen()"></app-sidebar>
+  
+  <div class="main-content">
+    <div class="top-bar">
+      <button class="toggle-btn" (click)="toggleSidebar()" title="Menü">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    
+    <div class="content-area">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

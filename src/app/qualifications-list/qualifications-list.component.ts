@@ -6,6 +6,7 @@ import { forkJoin } from 'rxjs';
 import { QualificationEmployeesResponse } from '../types/QualificationEmployeeResponse';
 import { EmployeeListComponent } from './employee-list/employee-list.component';
 import { QualificationFormComponent } from './qualification-form/qualification-form.component';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-qualifications-list',
@@ -45,14 +46,10 @@ export class QualificationsListComponent implements OnInit {
     return skill.length >= 2 && skill.length <= 50;
   });
 
-  // TODO: Replace with AuthService (Marouane)
-  private TEMP_TOKEN =
-    'eyJhbGciOiJSUzI1NiIsImtpZCI6ImM0MDc3MzdjMTg1MzQyYTk5Y2VlYzcyMTQwM2I4NjViIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkwMDAvYXBwbGljYXRpb24vby9lbXBsb3llZV9hcGkvIiwic3ViIjoiYjBlMDExYmU0Y2VlYzliOTYwNzA0MDY3ODU0OWJmNzA4M2I5ZjAwNGQ2MGQ2MTU5NTAwNjIwOWYyMmY5NmY1ZCIsImF1ZCI6ImVtcGxveWVlX2FwaV9jbGllbnQiLCJleHAiOjE3NjgyMzEyNjMsImlhdCI6MTc2ODIyODI2MywiYXV0aF90aW1lIjoxNzY4MjI4MjYzLCJhY3IiOiJnb2F1dGhlbnRpay5pby9wcm92aWRlcnMvb2F1dGgyL2RlZmF1bHQiLCJhenAiOiJlbXBsb3llZV9hcGlfY2xpZW50IiwidWlkIjoickoxZk9RUjBNd1V2OHdVV2JXSXRUYmtvc0VEMEpTR0w2ZUJvVXliRiJ9.UClzkgBMTm1VUtpw5sU8F5NmKIfKjZHx688bfCyiFL4NUtLiURSlBLoUtxEievaksoMxGVqRhg9On_p60qF6_RYhR4fK6PMojys5VvUNOcjGjUPCFK4SCF5YAJRWbcbX-7Epm5-quMIiVAoVQX3aKkyDneMCJ7LOPNoMDTvMpZCuW_SyvHTxEdp3N9rU9HlDHsCDl2khaAyp-iclVBzurCbP2TqneljgT3SrcQPq9k8EzbNmY2F1jm38wKbaLdh6nkVJVMJOcHFDUChR_MRmfdfM-oeRia6yU6C4tAQRKERVR6FANmSdSCcgUh9OwrHZJoYHN8Gu3jdDYvcwKY6azZqDNxYPpXkWfIVEaKzP8RPkyeUQW7OmAG8xhqQI81l_wYGKva6_qu-3LNtPB7BL7wrrm7Ez6kQ0lAf7fr2RDFWI6Rx2JNUWU-Zymckp-XCuOLr12FffrgqNCMufb3v_OUqqXD-iUtAtcEGD9gdMPwdiYGLHVhfeJk-CQzAKmjRgblXgWu0zgMDQ8eS0gF_uqdgznBZAKzavEKg6LrCKm6Am_AiJkrS9_VzbLDC30dgeOsfsAWvyU7WO9ohAXEN4ygluyMvdHS3hDuG0AI-eVopqyrSsccvMXuZG_0WKnTlQlh3tWt9YjUjf0wt4Tga0g9RgPJMuJXPEmmK51qMESfI';
-
   private apiUrl = 'http://localhost:8089/qualifications';
   private employeesApiUrl = 'http://localhost:8089/employees';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
   ngOnInit(): void {
     this.loadQualifications();
@@ -79,11 +76,17 @@ export class QualificationsListComponent implements OnInit {
    * Load all qualifications AND their employee counts
    */
   loadQualifications(): void {
+    const token = this.authService.getToken();
+    if (!token) {
+      console.error('No authentication token available');
+      return;
+    }
+
     this.http
       .get<Qualification[]>(this.apiUrl, {
         headers: new HttpHeaders().set(
           'Authorization',
-          `Bearer ${this.TEMP_TOKEN}`
+          `Bearer ${token}`
         ),
       })
       .subscribe({
@@ -106,13 +109,19 @@ export class QualificationsListComponent implements OnInit {
       return;
     }
 
+    const token = this.authService.getToken();
+    if (!token) {
+      console.error('No authentication token available');
+      return;
+    }
+
     const requests = qualifications.map((q) =>
       this.http.get<QualificationEmployeesResponse>(
         `${this.apiUrl}/${q.id}/employees`,
         {
           headers: new HttpHeaders().set(
             'Authorization',
-            `Bearer ${this.TEMP_TOKEN}`
+            `Bearer ${token}`
           ),
         }
       )
@@ -233,10 +242,16 @@ export class QualificationsListComponent implements OnInit {
       skill: this.formSkill().trim(),
     };
 
+    const token = this.authService.getToken();
+    if (!token) {
+      alert('Authentifizierungstoken nicht verfügbar');
+      return;
+    }
+
     this.http
       .post<Qualification>(this.apiUrl, newQualification, {
         headers: new HttpHeaders()
-          .set('Authorization', `Bearer ${this.TEMP_TOKEN}`)
+          .set('Authorization', `Bearer ${token}`)
           .set('Content-Type', 'application/json'),
       })
       .subscribe({
@@ -278,13 +293,19 @@ export class QualificationsListComponent implements OnInit {
       skill: this.formSkill().trim(),
     };
 
+    const token = this.authService.getToken();
+    if (!token) {
+      alert('Authentifizierungstoken nicht verfügbar');
+      return;
+    }
+
     this.http
       .put<Qualification>(
         `${this.apiUrl}/${updatedQualification.id}`,
         updatedQualification,
         {
           headers: new HttpHeaders()
-            .set('Authorization', `Bearer ${this.TEMP_TOKEN}`)
+            .set('Authorization', `Bearer ${token}`)
             .set('Content-Type', 'application/json'),
         }
       )
@@ -323,26 +344,38 @@ export class QualificationsListComponent implements OnInit {
     // Step 1: If employees have this qualification, remove it from them first
     if (employeeCount > 0) {
       // Get employees with this qualification
+      const token = this.authService.getToken();
+      if (!token) {
+        alert('Authentifizierungstoken nicht verfügbar');
+        return;
+      }
+
       this.http
         .get<QualificationEmployeesResponse>(
           `${this.apiUrl}/${qualification.id}/employees`,
           {
             headers: new HttpHeaders().set(
               'Authorization',
-              `Bearer ${this.TEMP_TOKEN}`
+              `Bearer ${token}`
             ),
           }
         )
         .subscribe({
           next: (response) => {
             // Remove qualification from each employee
+            const token = this.authService.getToken();
+            if (!token) {
+              alert('Authentifizierungstoken nicht verfügbar');
+              return;
+            }
+
             const removeRequests = response.employees.map((employee) =>
               this.http.delete(
                 `${this.employeesApiUrl}/${employee.id}/qualifications/${qualification.id}`,
                 {
                   headers: new HttpHeaders().set(
                     'Authorization',
-                    `Bearer ${this.TEMP_TOKEN}`
+                    `Bearer ${token}`
                   ),
                 }
               )
@@ -380,11 +413,17 @@ export class QualificationsListComponent implements OnInit {
    * Actually delete the qualification after employees are cleaned up
    */
   private deleteQualification(id: number): void {
+    const token = this.authService.getToken();
+    if (!token) {
+      alert('Authentifizierungstoken nicht verfügbar');
+      return;
+    }
+
     this.http
       .delete(`${this.apiUrl}/${id}`, {
         headers: new HttpHeaders().set(
           'Authorization',
-          `Bearer ${this.TEMP_TOKEN}`
+          `Bearer ${token}`
         ),
       })
       .subscribe({

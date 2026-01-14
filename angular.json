@@ -62,7 +62,8 @@
               "buildTarget": "lf10Starter2024:build:production"
             },
             "development": {
-              "buildTarget": "lf10Starter2024:build:development"
+              "buildTarget": "lf10Starter2024:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

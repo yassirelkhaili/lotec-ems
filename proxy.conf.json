@@ -1,20 +1,20 @@
 {
   "/backend": {
-    "target": "http://localhost:8089/",
+    "target": "http://localhost:8089",
     "secure": false,
-    "logLevel": "debug",
+    "changeOrigin": true,
     "pathRewrite": {
       "^/backend": ""
     },
-    "changeOrigin": true
+    "logLevel": "debug"
   },
   "/keycloak": {
-    "target": "https://keycloak.szut.dev/",
+    "target": "https://keycloak.szut.dev",
     "secure": false,
-    "logLevel": "debug",
+    "changeOrigin": true,
     "pathRewrite": {
       "^/keycloak": ""
     },
-    "changeOrigin": true
+    "logLevel": "debug"
   }
 }

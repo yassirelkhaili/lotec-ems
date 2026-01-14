@@ -1,0 +1,52 @@
+.dashboard-container {
+  display: flex;
+  height: 100vh;
+  background-color: #1E1D3F;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.top-bar {
+  background-color: #1E1D3F;
+  border-bottom: 1px solid rgba(224, 122, 7, 0.2);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toggle-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  margin-right: 16px;
+}
+
+.toggle-btn span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background-color: #E07A07;
+  margin: 6px 0;
+  transition: 0.3s;
+}
+
+.content-area {
+  flex: 1;
+  overflow: auto;
+  padding: 24px;
+}
+
+@media (max-width: 768px) {
+  .toggle-btn {
+    display: block;
+  }
+}

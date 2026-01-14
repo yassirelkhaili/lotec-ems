@@ -1,0 +1,35 @@
+<div class="login-container">
+  <div class="login-card">
+    <h1>HiTec EMS</h1>
+    @if (error()) {
+      <div class="error">{{ error() }}</div>
+    }
+    <form (ngSubmit)="login()">
+      <div class="form-group">
+        <label for="username">Benutzername</label>
+        <input 
+          id="username"
+          type="text" 
+          placeholder="Geben Sie Ihren Benutzernamen ein" 
+          [value]="username()"
+          (input)="onUsernameChange($any($event.target).value)"
+          [disabled]="isLoading()"
+        />
+      </div>
+      <div class="form-group">
+        <label for="password">Passwort</label>
+        <input 
+          id="password"
+          type="password" 
+          placeholder="Geben Sie Ihr Passwort ein" 
+          [value]="password()"
+          (input)="onPasswordChange($any($event.target).value)"
+          [disabled]="isLoading()"
+        />
+      </div>
+      <button type="submit" [disabled]="isLoading()">
+        {{ isLoading() ? 'Anmeldung läuft...' : 'Anmelden' }}
+      </button>
+    </form>
+  </div>
+</div>
