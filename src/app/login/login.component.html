@@ -10,7 +10,7 @@
         <input 
           id="username"
           type="text" 
-          placeholder="Geben Sie Ihren Benutzernamen ein" 
+          placeholder="Benutzernamen" 
           [value]="username()"
           (input)="onUsernameChange($any($event.target).value)"
           [disabled]="isLoading()"
@@ -21,7 +21,7 @@
         <input 
           id="password"
           type="password" 
-          placeholder="Geben Sie Ihr Passwort ein" 
+          placeholder="Passwort" 
           [value]="password()"
           (input)="onPasswordChange($any($event.target).value)"
           [disabled]="isLoading()"
