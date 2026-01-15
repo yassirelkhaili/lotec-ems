@@ -78,6 +78,20 @@ export class AuthService {
   }
 
   /**
+   * Get username from token
+   */
+  getUsername(): string | null {
+    const token = this.getToken();
+    if (!token) return null;
+    try {
+      const payload = this.parseJwt(token);
+      return payload.preferred_username || payload.sub || null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
    * Store token in localStorage
    */
   private storeToken(token: string): void {

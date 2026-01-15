@@ -21,6 +21,44 @@
   justify-content: space-between;
 }
 
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-left: auto;
+}
+
+.username {
+  color: #E07A07;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: transparent;
+  border: 1px solid #E07A07;
+  border-radius: 6px;
+  color: #E07A07;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.logout-btn:hover {
+  background-color: #E07A07;
+  color: white;
+}
+
+.logout-label {
+  font-size: 13px;
+}
+
 .toggle-btn {
   display: none;
   background: none;

@@ -19,7 +19,4 @@ export class SidebarComponent {
     return this.router.url.includes(route);
   }
 
-  logout(): void {
-    this.authService.logout();
-  }
 }

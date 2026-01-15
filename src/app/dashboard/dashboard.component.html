@@ -8,6 +8,13 @@
         <span></span>
         <span></span>
       </button>
+      
+      <div class="user-section">
+        <span class="username">Willkommen zurück, {{ username() }} 👋</span>
+        <button class="logout-btn" (click)="logout()" title="Abmelden">
+          <span class="logout-label">Abmelden</span>
+        </button>
+      </div>
     </div>
     
     <div class="content-area">

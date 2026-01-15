@@ -5,30 +5,24 @@
 
   <nav class="nav-menu">
     <a 
-      routerLink="/employees" 
+      routerLink="/dashboard/employees" 
       routerLinkActive="active"
       class="nav-item"
-      [routerLinkActiveOptions]="{ exact: false }"
+      [routerLinkActiveOptions]="{ exact: true }"
     >
       <span class="nav-icon">👥</span>
       <span class="nav-label">Mitarbeiter</span>
     </a>
 
     <a 
-      routerLink="/qualifications" 
+      routerLink="/dashboard/qualifications" 
       routerLinkActive="active"
       class="nav-item"
-      [routerLinkActiveOptions]="{ exact: false }"
+      [routerLinkActiveOptions]="{ exact: true }"
     >
       <span class="nav-icon">⭐</span>
       <span class="nav-label">Qualifikationen</span>
     </a>
   </nav>
 
-  <div class="logout-section">
-    <button class="logout-btn" (click)="logout()">
-      <span class="logout-icon">🚪</span>
-      <span class="logout-label">Abmelden</span>
-    </button>
-  </div>
 </div>

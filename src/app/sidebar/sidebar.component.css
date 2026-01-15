@@ -51,11 +51,11 @@
 }
 
 .nav-item.active {
-  background-color: rgba(224, 122, 7, 0.15);
-  color: #E07A07;
+  background-color: #E07A07;
+  color: white;
   font-weight: 600;
-  border-left: 3px solid #E07A07;
-  padding-left: 13px;
+  border-left: none;
+  padding-left: 16px;
 }
 
 .nav-icon {
@@ -63,39 +63,6 @@
 }
 
 .nav-label {
-  font-size: 14px;
-}
-
-.logout-section {
-  padding: 20px 12px;
-  border-top: 1px solid rgba(224, 122, 7, 0.2);
-}
-
-.logout-btn {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 12px 16px;
-  background-color: rgba(224, 122, 7, 0.1);
-  border: 1px solid #E07A07;
-  border-radius: 6px;
-  color: #E07A07;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.logout-btn:hover {
-  background-color: #E07A07;
-  color: white;
-}
-
-.logout-icon {
-  font-size: 18px;
-}
-
-.logout-label {
   font-size: 14px;
 }
 
