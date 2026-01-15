@@ -1,0 +1,55 @@
+p {
+  color: white;
+}
+
+.btn {
+  font-family: var(--font-primary);
+  padding: 12.5px 20px;
+  border: none;
+  border-radius: 20px 0px 0px 20px;
+  margin-right: 0;
+
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.1s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+div {
+
+  margin-bottom: 20px;
+}
+
+.btn-success {
+  background-color: var(--background-secondary);
+  color: white;
+}
+
+.btn-success:hover {
+  background-color: var(--background-secondary-hover);
+}
+
+.btn-success:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: var(--text-purple);
+  color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+  background-color: var(--text-purple-hover);
+}
+
+input {
+  margin: 0;
+  text-align: center;
+  padding: 15px;
+  border: none;
+}
