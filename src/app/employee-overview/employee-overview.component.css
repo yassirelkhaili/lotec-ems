@@ -1,55 +1,96 @@
-p {
-  color: white;
+.logout_content {
+  h1 {
+    color: white;
+    display: inline-block;
+    margin: 10px;
+    font-weight: lighter;
+  }
+  button {
+    font-size: 27px;
+    background: none;
+    color: red;
+    text-decoration: underline;
+    border: none;
+    border-radius: 10px;
+    margin: 10px;
+  }
+
+  button:hover {
+    background-color: darkorange;
+  }
+
+  button:active {
+    background-color: darkgoldenrod;
+  }
 }
 
-.btn {
-  font-family: var(--font-primary);
-  padding: 12.5px 20px;
-  border: none;
-  border-radius: 20px 0px 0px 20px;
-  margin-right: 0;
+.table_content {
+  table {
+    border-collapse: collapse;
+  }
 
-  font-size: 17px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.1s;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+  td {
+    padding: 10px;
+    color: black;
+  }
+
+  tr {
+    background-color: white;
+  }
+
+  tr:nth-child(2n) {
+    background-color: lightcyan;
+  }
+
+  th {
+    padding: 10px;
+    color: white;
+    background-color: orange;
+  }
 }
 
-div {
+.message_content {
+  h1 {
+    color: white;
+  }
+  p {
+    color: darkgray;
+  }
+}
+.button-orange {
+  button {
+    background-color: orange;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+  }
 
-  margin-bottom: 20px;
+  button:hover {
+    background-color: darkorange;
+  }
+
+  button:active {
+    background-color: darkgoldenrod;
+  }
 }
 
-.btn-success {
-  background-color: var(--background-secondary);
-  color: white;
+
+.labeled_input {
+  label {
+    background-color: lightgray;
+    padding: 11px;
+    border: none;
+    border-radius: 10px 0px 0px 10px;
+    display: inline-block;
+  }
+
+  input {
+    padding: 10px;
+    border: 2px solid white;
+    border-radius: 0px 10px 10px 0px;
+  }
 }
 
-.btn-success:hover {
-  background-color: var(--background-secondary-hover);
-}
-
-.btn-success:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background-color: var(--text-purple);
-  color: var(--text-primary);
-}
-
-.btn-secondary:hover {
-  background-color: var(--text-purple-hover);
-}
-
-input {
-  margin: 0;
-  text-align: center;
-  padding: 15px;
-  border: none;
+.content_area {
+  padding: 10px;
 }
