@@ -1,91 +1,96 @@
 <table>
   <tr>
-    <td>
-      <div class="message_content">
-        <h1>Willkommen zurück, Ali</h1>
-        <p>Hier ist Ihre Personalübersicht für heute.</p>
+    <td class="button-orange">
+      <div>
+        <h1>Hitec Ems</h1>
+        <p>Employee Managment System</p>
       </div>
+      <button>Qualifikationen</button>
+      <br>
+      <button>Mitarbeiter</button>
     </td>
     <td>
-      <div class="logout_content">
-        <h1>Ali Marandi</h1>
-        <button>Logout</button>
+
+      <table>
+        <tr>
+          <td>
+            <div class="message_content">
+              <h1>Willkommen zurück, Ali</h1>
+              <p>Hier ist Ihre Personalübersicht für heute.</p>
+            </div>
+          </td>
+          <td>
+            <div class="logout_content">
+              <h1>Ali Marandi</h1>
+              <button>Logout</button>
+            </div>
+          </td>
+        </tr>
+      </table>
+
+
+      <div class="content_area">
+        <table>
+          <tr>
+            <td>
+              <div class="labeled_input">
+                <label>Nachname:</label>
+                <input type="text">
+              </div>
+            </td>
+            <td>
+              <div class="labeled_input">
+                <label>Vorname:</label>
+                <input type="text">
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <div class="labeled_input">
+                <label>Ort:</label>
+                <input type="text">
+              </div>
+            </td>
+            <td>
+              <div class="labeled_input">
+                <label>Qualifikation:</label>
+                <input type="text">
+              </div>
+            </td>
+          </tr>
+
+          <tr class="button-orange">
+            <td>
+              <button>Filter anwenden</button>
+            </td>
+            <td>
+              <button>+ Mitarbeiter hinzufügen</button>
+            </td>
+          </tr>
+        </table>
+        <div class="table_content">
+          <table>
+            <tr>
+              <th>Nachname</th>
+              <th>Vorname</th>
+              <th>Ort</th>
+              <th>Actions</th>
+            </tr>
+            @for (item of items; track item) {
+            <tr>
+              <td>{{item.firstname}}</td>
+              <td>{{item.lastname}}</td>
+              <td>{{item.location}}</td>
+              <td>Actions</td>
+            </tr>
+            }
+          </table>
+        </div>
+
       </div>
+
     </td>
   </tr>
 </table>
-
-
-
-
-<div class="content_area">
-  <table>
-    <tr>
-      <td>
-        <div class="labeled_input">
-          <label>Nachname:</label>
-          <input type="text">
-        </div>
-      </td>
-      <td>
-        <div class="labeled_input">
-          <label>Vorname:</label>
-          <input type="text">
-        </div>
-      </td>
-    </tr>
-
-    <tr>
-      <td>
-        <div class="labeled_input">
-          <label>Ort:</label>
-          <input type="text">
-        </div>
-      </td>
-      <td>
-        <div class="labeled_input">
-          <label>Qualifikation:</label>
-          <input type="text">
-        </div>
-      </td>
-    </tr>
-
-    <tr class="button-orange">
-      <td>
-        <button>Filter anwenden</button>
-      </td>
-      <td>
-        <button>+ Mitarbeiter hinzufügen</button>
-      </td>
-    </tr>
-  </table>
-<div class="table_content">
-  <table>
-    <tr>
-      <th>Nachname</th>
-      <th>Vorname</th>
-      <th>Ort</th>
-      <th>Actions</th>
-    </tr>
-    <tr>
-      <td>test1</td>
-      <td>test2</td>
-      <td>test3</td>
-      <td>test4</td>
-    </tr>
-    <tr>
-      <td>test1</td>
-      <td>test2</td>
-      <td>test3</td>
-      <td>test4</td>
-    </tr>
-    <tr>
-      <td>test1</td>
-      <td>test2</td>
-      <td>test3</td>
-      <td>test4</td>
-    </tr>
-  </table>
-</div>
-
-</div>

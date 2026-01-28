@@ -74,6 +74,13 @@
   }
 }
 
+p {
+  color: white;
+}
+
+h1 {
+  color: white;
+}
 
 .labeled_input {
   label {
@@ -94,3 +101,5 @@
 .content_area {
   padding: 10px;
 }
+
+
