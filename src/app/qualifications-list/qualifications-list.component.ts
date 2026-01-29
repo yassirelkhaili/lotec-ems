@@ -1,6 +1,6 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Qualification } from '../types/Qualification';
 import { forkJoin } from 'rxjs';
 import { QualificationEmployeesResponse } from '../types/QualificationEmployeeResponse';
@@ -46,8 +46,9 @@ export class QualificationsListComponent implements OnInit {
     return skill.length >= 2 && skill.length <= 50;
   });
 
-  private apiUrl = 'http://localhost:8089/qualifications';
-  private employeesApiUrl = 'http://localhost:8089/employees';
+  // Use proxy URLs - the AuthInterceptor will add the Bearer token automatically
+  private apiUrl = '/backend/qualifications';
+  private employeesApiUrl = '/backend/employees';
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
@@ -76,29 +77,22 @@ export class QualificationsListComponent implements OnInit {
    * Load all qualifications AND their employee counts
    */
   loadQualifications(): void {
-    const token = this.authService.getToken();
-    if (!token) {
+    if (!this.authService.isAuthenticated()) {
       console.error('No authentication token available');
       return;
     }
 
-    this.http
-      .get<Qualification[]>(this.apiUrl, {
-        headers: new HttpHeaders().set(
-          'Authorization',
-          `Bearer ${token}`
-        ),
-      })
-      .subscribe({
-        next: (data) => {
-          this.qualifications.set(data);
-          this.loadEmployeeCounts(data);
-        },
-        error: (error) => {
-          console.error('Error loading qualifications:', error);
-          alert('Failed to load qualifications. Check console for details.');
-        },
-      });
+    // AuthInterceptor automatically adds the Bearer token
+    this.http.get<Qualification[]>(this.apiUrl).subscribe({
+      next: (data) => {
+        this.qualifications.set(data);
+        this.loadEmployeeCounts(data);
+      },
+      error: (error) => {
+        console.error('Error loading qualifications:', error);
+        alert('Failed to load qualifications. Check console for details.');
+      },
+    });
   }
 
   /**
@@ -109,21 +103,15 @@ export class QualificationsListComponent implements OnInit {
       return;
     }
 
-    const token = this.authService.getToken();
-    if (!token) {
+    if (!this.authService.isAuthenticated()) {
       console.error('No authentication token available');
       return;
     }
 
+    // AuthInterceptor automatically adds the Bearer token
     const requests = qualifications.map((q) =>
       this.http.get<QualificationEmployeesResponse>(
-        `${this.apiUrl}/${q.id}/employees`,
-        {
-          headers: new HttpHeaders().set(
-            'Authorization',
-            `Bearer ${token}`
-          ),
-        }
+        `${this.apiUrl}/${q.id}/employees`
       )
     );
 
@@ -242,39 +230,33 @@ export class QualificationsListComponent implements OnInit {
       skill: this.formSkill().trim(),
     };
 
-    const token = this.authService.getToken();
-    if (!token) {
+    if (!this.authService.isAuthenticated()) {
       alert('Authentifizierungstoken nicht verfügbar');
       return;
     }
 
-    this.http
-      .post<Qualification>(this.apiUrl, newQualification, {
-        headers: new HttpHeaders()
-          .set('Authorization', `Bearer ${token}`)
-          .set('Content-Type', 'application/json'),
-      })
-      .subscribe({
-        next: () => {
-          this.loadQualifications();
-          this.closeModal();
-          alert('Qualifikation erfolgreich erstellt!');
-        },
-        error: (error) => {
-          console.error('Error creating qualification:', error);
+    // AuthInterceptor automatically adds the Bearer token
+    this.http.post<Qualification>(this.apiUrl, newQualification).subscribe({
+      next: () => {
+        this.loadQualifications();
+        this.closeModal();
+        alert('Qualifikation erfolgreich erstellt!');
+      },
+      error: (error) => {
+        console.error('Error creating qualification:', error);
 
-          if (
-            error.status === 500 &&
-            error.error?.message?.includes('duplicate key')
-          ) {
-            alert(
-              `Die Qualifikation "${this.formSkill().trim()}" existiert bereits!`
-            );
-          } else {
-            alert('Fehler beim Erstellen der Qualifikation.');
-          }
-        },
-      });
+        if (
+          error.status === 500 &&
+          error.error?.message?.includes('duplicate key')
+        ) {
+          alert(
+            `Die Qualifikation "${this.formSkill().trim()}" existiert bereits!`
+          );
+        } else {
+          alert('Fehler beim Erstellen der Qualifikation.');
+        }
+      },
+    });
   }
 
   /**
@@ -293,21 +275,16 @@ export class QualificationsListComponent implements OnInit {
       skill: this.formSkill().trim(),
     };
 
-    const token = this.authService.getToken();
-    if (!token) {
+    if (!this.authService.isAuthenticated()) {
       alert('Authentifizierungstoken nicht verfügbar');
       return;
     }
 
+    // AuthInterceptor automatically adds the Bearer token
     this.http
       .put<Qualification>(
         `${this.apiUrl}/${updatedQualification.id}`,
-        updatedQualification,
-        {
-          headers: new HttpHeaders()
-            .set('Authorization', `Bearer ${token}`)
-            .set('Content-Type', 'application/json'),
-        }
+        updatedQualification
       )
       .subscribe({
         next: () => {
@@ -344,40 +321,27 @@ export class QualificationsListComponent implements OnInit {
     // Step 1: If employees have this qualification, remove it from them first
     if (employeeCount > 0) {
       // Get employees with this qualification
-      const token = this.authService.getToken();
-      if (!token) {
+      if (!this.authService.isAuthenticated()) {
         alert('Authentifizierungstoken nicht verfügbar');
         return;
       }
 
+      // AuthInterceptor automatically adds the Bearer token
       this.http
         .get<QualificationEmployeesResponse>(
-          `${this.apiUrl}/${qualification.id}/employees`,
-          {
-            headers: new HttpHeaders().set(
-              'Authorization',
-              `Bearer ${token}`
-            ),
-          }
+          `${this.apiUrl}/${qualification.id}/employees`
         )
         .subscribe({
           next: (response) => {
-            // Remove qualification from each employee
-            const token = this.authService.getToken();
-            if (!token) {
+            if (!this.authService.isAuthenticated()) {
               alert('Authentifizierungstoken nicht verfügbar');
               return;
             }
 
+            // AuthInterceptor automatically adds the Bearer token
             const removeRequests = response.employees.map((employee) =>
               this.http.delete(
-                `${this.employeesApiUrl}/${employee.id}/qualifications/${qualification.id}`,
-                {
-                  headers: new HttpHeaders().set(
-                    'Authorization',
-                    `Bearer ${token}`
-                  ),
-                }
+                `${this.employeesApiUrl}/${employee.id}/qualifications/${qualification.id}`
               )
             );
 
@@ -413,41 +377,34 @@ export class QualificationsListComponent implements OnInit {
    * Actually delete the qualification after employees are cleaned up
    */
   private deleteQualification(id: number): void {
-    const token = this.authService.getToken();
-    if (!token) {
+    if (!this.authService.isAuthenticated()) {
       alert('Authentifizierungstoken nicht verfügbar');
       return;
     }
 
-    this.http
-      .delete(`${this.apiUrl}/${id}`, {
-        headers: new HttpHeaders().set(
-          'Authorization',
-          `Bearer ${token}`
-        ),
-      })
-      .subscribe({
-        next: () => {
-          this.loadQualifications();
-          this.closeModal();
-          alert('Qualifikation erfolgreich gelöscht!');
-        },
-        error: (error) => {
-          console.error('Error deleting qualification:', error);
+    // AuthInterceptor automatically adds the Bearer token
+    this.http.delete(`${this.apiUrl}/${id}`).subscribe({
+      next: () => {
+        this.loadQualifications();
+        this.closeModal();
+        alert('Qualifikation erfolgreich gelöscht!');
+      },
+      error: (error) => {
+        console.error('Error deleting qualification:', error);
 
-          // Better error handling
-          if (error.status === 403) {
-            alert(
-              'Die Qualifikation ist noch in Verwendung und kann nicht gelöscht werden.'
-            );
-          } else if (error.status === 500) {
-            alert(
-              'Serverfehler beim Löschen der Qualifikation. Bitte versuchen Sie es erneut.'
-            );
-          } else {
-            alert('Fehler beim Löschen der Qualifikation.');
-          }
-        },
-      });
+        // Better error handling
+        if (error.status === 403) {
+          alert(
+            'Die Qualifikation ist noch in Verwendung und kann nicht gelöscht werden.'
+          );
+        } else if (error.status === 500) {
+          alert(
+            'Serverfehler beim Löschen der Qualifikation. Bitte versuchen Sie es erneut.'
+          );
+        } else {
+          alert('Fehler beim Löschen der Qualifikation.');
+        }
+      },
+    });
   }
 }

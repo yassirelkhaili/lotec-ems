@@ -18,6 +18,11 @@ export class AuthInterceptor implements HttpInterceptor {
     request: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
+    // Skip adding token for authentication requests
+    if (request.url.includes('/keycloak/')) {
+      return next.handle(request);
+    }
+
     const token = this.authService.getToken();
 
     // Add token to request if it exists

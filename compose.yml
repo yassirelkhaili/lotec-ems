@@ -21,7 +21,7 @@ services:
 
   employee:
     container_name: employee
-    image: berndheidemann/employee-management-service-authentik:1.0.1
+    image: berndheidemann/employee-management-service:1.1.3.1
     environment:
       spring.datasource.url: jdbc:postgresql://postgres-employee:5432/employee_db
       spring.datasource.username: employee

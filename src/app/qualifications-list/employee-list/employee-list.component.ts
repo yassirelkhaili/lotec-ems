@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { QualificationEmployeesResponse } from '../../types/QualificationEmployeeResponse';
 import { AuthService } from '../../services/auth.service';
 
@@ -45,8 +45,9 @@ export class EmployeeListComponent implements OnInit {
     );
   });
 
-  private qualificationsApiUrl = 'http://localhost:8089/qualifications';
-  private employeesApiUrl = 'http://localhost:8089/employees';
+  // Use proxy URLs - AuthInterceptor adds Bearer token automatically
+  private qualificationsApiUrl = '/backend/qualifications';
+  private employeesApiUrl = '/backend/employees';
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
@@ -61,22 +62,15 @@ export class EmployeeListComponent implements OnInit {
   private loadEmployees(): void {
     this.isLoading.set(true);
 
-    const token = this.authService.getToken();
-    if (!token) {
-      console.error('No authentication token available');
+    if (!this.authService.isAuthenticated()) {
       this.isLoading.set(false);
       return;
     }
 
+    // AuthInterceptor adds Bearer token automatically
     this.http
       .get<QualificationEmployeesResponse>(
-        `${this.qualificationsApiUrl}/${this.qualificationId}/employees`,
-        {
-          headers: new HttpHeaders().set(
-            'Authorization',
-            `Bearer ${token}`
-          ),
-        }
+        `${this.qualificationsApiUrl}/${this.qualificationId}/employees`
       )
       .subscribe({
         next: (response) => {
@@ -95,27 +89,19 @@ export class EmployeeListComponent implements OnInit {
    * load available employees
    */
   private loadAllEmployees(): void {
-    const token = this.authService.getToken();
-    if (!token) {
-      console.error('No authentication token available');
+    if (!this.authService.isAuthenticated()) {
       return;
     }
 
-    this.http
-      .get<Employee[]>(this.employeesApiUrl, {
-        headers: new HttpHeaders().set(
-          'Authorization',
-          `Bearer ${token}`
-        ),
-      })
-      .subscribe({
-        next: (employees) => {
-          this.allEmployees.set(employees);
-        },
-        error: (error) => {
-          console.error('Error loading all employees:', error);
-        },
-      });
+    // AuthInterceptor adds Bearer token automatically
+    this.http.get<Employee[]>(this.employeesApiUrl).subscribe({
+      next: (employees) => {
+        this.allEmployees.set(employees);
+      },
+      error: (error) => {
+        console.error('Error loading all employees:', error);
+      },
+    });
   }
 
   /**
@@ -129,25 +115,18 @@ export class EmployeeListComponent implements OnInit {
       return;
     }
 
-    const token = this.authService.getToken();
-    if (!token) {
+    if (!this.authService.isAuthenticated()) {
       alert('Authentifizierungstoken nicht verfügbar');
       return;
     }
 
     this.isAddingEmployee.set(true);
 
-    // POST /employees/{id}/qualifications
+    // POST /employees/{id}/qualifications - AuthInterceptor adds Bearer token
     this.http
-      .post(
-        `${this.employeesApiUrl}/${employeeId}/qualifications`,
-        { skill: this.qualificationName() },
-        {
-          headers: new HttpHeaders()
-            .set('Authorization', `Bearer ${token}`)
-            .set('Content-Type', 'application/json'),
-        }
-      )
+      .post(`${this.employeesApiUrl}/${employeeId}/qualifications`, {
+        skill: this.qualificationName(),
+      })
       .subscribe({
         next: () => {
           this.loadEmployees();
@@ -176,22 +155,15 @@ export class EmployeeListComponent implements OnInit {
       return;
     }
 
-    const token = this.authService.getToken();
-    if (!token) {
+    if (!this.authService.isAuthenticated()) {
       alert('Authentifizierungstoken nicht verfügbar');
       return;
     }
 
-    // DELETE /employees/{eid}/qualifications/{qid}
+    // DELETE /employees/{eid}/qualifications/{qid} - AuthInterceptor adds Bearer token
     this.http
       .delete(
-        `${this.employeesApiUrl}/${employeeId}/qualifications/${this.qualificationId}`,
-        {
-          headers: new HttpHeaders().set(
-            'Authorization',
-            `Bearer ${token}`
-          ),
-        }
+        `${this.employeesApiUrl}/${employeeId}/qualifications/${this.qualificationId}`
       )
       .subscribe({
         next: () => {
