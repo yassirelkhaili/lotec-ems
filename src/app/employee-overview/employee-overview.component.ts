@@ -1,22 +1,37 @@
-import {Component, Inject, Injectable, Input} from '@angular/core';
+import {Component, inject, Inject, Injectable, Input, TemplateRef} from '@angular/core';
+import {Router} from "@angular/router";
+import {NgTemplateOutlet} from "@angular/common";
+import {NavigationComponent} from "../navigation/navigation.component";
 
 @Component({
   selector: 'app-employee-overview',
   standalone: true,
-  imports: [],
+  imports: [
+    NgTemplateOutlet,
+    NavigationComponent
+  ],
   templateUrl: './employee-overview.component.html',
   styleUrl: './employee-overview.component.css'
 })
 
 export class EmployeeOverviewComponent {
-  items: Item[] = [
-    new Item("1","2","3"),
-    new Item("3","2","1"),
-    new Item("111","222","333")
+
+  items: Employee[] = [
+    new Employee("1","2","3"),
+    new Employee("3","2","1"),
+    new Employee("111","222","333")
   ]
+  protected readonly window = window;
+
+  private router: Router = inject(Router);
+
+  navigate(path: string){
+    this.router.navigate([path])
+  }
+
 }
 
-export class Item{
+export class Employee {
   private _lastname: string;
   private _firstname: string;
   private _location: string;
