@@ -1,0 +1,16 @@
+.button-orange {
+  button {
+    background-color: orange;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+  }
+
+  button:hover {
+    background-color: darkorange;
+  }
+
+  button:active {
+    background-color: darkgoldenrod;
+  }
+}

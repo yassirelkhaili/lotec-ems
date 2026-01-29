@@ -1,13 +1,11 @@
-import {Component, inject, Inject, Injectable, Input, TemplateRef} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {Router} from "@angular/router";
-import {NgTemplateOutlet} from "@angular/common";
 import {NavigationComponent} from "../navigation/navigation.component";
 
 @Component({
   selector: 'app-employee-overview',
   standalone: true,
   imports: [
-    NgTemplateOutlet,
     NavigationComponent
   ],
   templateUrl: './employee-overview.component.html',
@@ -21,9 +19,16 @@ export class EmployeeOverviewComponent {
     new Employee("3","2","1"),
     new Employee("111","222","333")
   ]
-  protected readonly window = window;
 
   private router: Router = inject(Router);
+
+  applyFilter() {
+
+  }
+
+  addEmployee() {
+
+  }
 
   navigate(path: string){
     this.router.navigate([path])
