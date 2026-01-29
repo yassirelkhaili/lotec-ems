@@ -14,7 +14,7 @@ import {NavigationComponent} from "../navigation/navigation.component";
 
 export class EmployeeOverviewComponent {
 
-  items: Employee[] = [
+  employees: Employee[] = [
     new Employee("1","2","3"),
     new Employee("3","2","1"),
     new Employee("111","222","333")
@@ -22,12 +22,8 @@ export class EmployeeOverviewComponent {
 
   private router: Router = inject(Router);
 
-  applyFilter() {
-
-  }
-
-  addEmployee() {
-
+  applyFilter(lastname: string, firstname: string, location: string, qualification: string) {
+    window.alert(lastname + " " + firstname + " " + location + " " + qualification);
   }
 
   navigate(path: string){

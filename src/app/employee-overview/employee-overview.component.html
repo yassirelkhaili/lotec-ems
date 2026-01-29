@@ -14,7 +14,7 @@
           <td>
             <div class="logout_content">
               <h1>Ali Marandi</h1>
-              <button>Logout</button>
+              <button (click)="navigate('logout')">Logout</button>
             </div>
           </td>
         </tr>
@@ -27,13 +27,13 @@
             <td>
               <div class="labeled_input">
                 <label>Nachname:</label>
-                <input type="text">
+                <input type="text" #lastnameInput>
               </div>
             </td>
             <td>
               <div class="labeled_input">
                 <label>Vorname:</label>
-                <input type="text">
+                <input type="text" #firstnameInput>
               </div>
             </td>
           </tr>
@@ -42,23 +42,23 @@
             <td>
               <div class="labeled_input">
                 <label>Ort:</label>
-                <input type="text">
+                <input type="text" #locationInput>
               </div>
             </td>
             <td>
               <div class="labeled_input">
                 <label>Qualifikation:</label>
-                <input type="text">
+                <input type="text" #qualificationInput>
               </div>
             </td>
           </tr>
 
           <tr class="button-orange">
             <td>
-              <button>Filter anwenden</button>
+              <button (click)="applyFilter(lastnameInput.value, firstnameInput.value, locationInput.value, qualificationInput.value)">Filter anwenden</button>
             </td>
             <td>
-              <button>+ Mitarbeiter hinzufügen</button>
+              <button (click)="navigate('create_employee')">+ Mitarbeiter hinzufügen</button>
             </td>
           </tr>
         </table>
@@ -70,11 +70,11 @@
               <th>Ort</th>
               <th>Actions</th>
             </tr>
-            @for (item of items; track item) {
+            @for (employee of employees; track employee) {
             <tr>
-              <td>{{item.firstname}}</td>
-              <td>{{item.lastname}}</td>
-              <td>{{item.location}}</td>
+              <td>{{employee.firstname}}</td>
+              <td>{{employee.lastname}}</td>
+              <td>{{employee.location}}</td>
               <td>Actions</td>
             </tr>
             }
