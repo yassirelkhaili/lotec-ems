@@ -1,0 +1,44 @@
+<div class="employee-list-container">
+  <div class="header">
+    <h2>Employees</h2>
+    <button class="btn btn-primary" (click)="onAddEmployee()">Add New Employee</button>
+  </div>
+
+  <div class="search-section">
+    <input
+      type="text"
+      placeholder="Search by name or city..."
+      [(ngModel)]="searchTerm"
+      (input)="onSearch()"
+      class="search-input">
+  </div>
+
+  <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <div class="success-message" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <div class="loading" *ngIf="isLoading">Loading employees...</div>
+
+  <div class="employee-grid" *ngIf="!isLoading && filteredEmployees.length > 0">
+    <div class="employee-card" *ngFor="let employee of filteredEmployees">
+      <div class="employee-info">
+        <h3>{{ employee.firstName }} {{ employee.lastName }}</h3>
+        <p>{{ employee.street }}, {{ employee.postcode }} {{ employee.city }}</p>
+        <p><strong>Phone:</strong> {{ employee.phone }}</p>
+      </div>
+      <div class="employee-actions">
+        <button class="btn btn-secondary" (click)="onViewEmployee(employee)">View</button>
+        <button class="btn btn-primary" (click)="onEditEmployee(employee)">Edit</button>
+        <button class="btn btn-danger" (click)="onDeleteEmployee(employee)">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="no-employees" *ngIf="!isLoading && filteredEmployees.length === 0 && employees.length === 0">
+    No employees found. <a href="#" (click)="onAddEmployee()">Add the first employee</a>.
+  </div>
+
+  <div class="no-results" *ngIf="!isLoading && filteredEmployees.length === 0 && employees.length > 0">
+    No employees match your search.
+  </div>
+</div>
