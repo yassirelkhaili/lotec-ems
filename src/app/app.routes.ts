@@ -14,9 +14,10 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'qualifications', pathMatch: 'full' },
       { path: 'qualifications', component: QualificationsListComponent },
-      // Employee routes - to be added by team member
-      // { path: 'employees', component: EmployeesListComponent },
-      // { path: 'employees/:id', component: EmployeeDetailComponent },
+      { path: 'employees', loadComponent: () => import('./employees/employee-list/employee-list.component').then(m => m.EmployeeListComponent) },
+      { path: 'employees/add', loadComponent: () => import('./employees/employee-form/employee-form.component').then(m => m.EmployeeFormComponent) },
+      { path: 'employees/:id/edit', loadComponent: () => import('./employees/employee-form/employee-form.component').then(m => m.EmployeeFormComponent) },
+      { path: 'employees/:id', loadComponent: () => import('./employees/employee-detail/employee-detail.component').then(m => m.EmployeeDetailComponent) },
     ]
   },
   { path: '**', redirectTo: '/login' }
