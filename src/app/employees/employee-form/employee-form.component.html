@@ -80,6 +80,15 @@
       </div>
     </div>
 
+
+    <div class="form-group">
+      <label for="qualifications">Qualifications</label>
+      <select id="qualifications" formControlName="qualifications" class="form-control" multiple>
+        <option *ngFor="let q of qualifications" [value]="q.id">{{ q.skill }}</option>
+      </select>
+      <div class="form-text">Hold Ctrl (Windows) or Cmd (Mac) to select multiple qualifications.</div>
+    </div>
+
     <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
     <div class="success-message" *ngIf="successMessage">{{ successMessage }}</div>
 
