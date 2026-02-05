@@ -1,9 +1,9 @@
 <div class="employee-form-container">
-  <h2>{{ isEditMode ? 'Edit Employee' : 'Add New Employee' }}</h2>
+  <h2>{{ isEditMode ? 'Mitarbeiter bearbeiten' : 'Neuen Mitarbeiter hinzufügen' }}</h2>
 
   <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" class="employee-form">
     <div class="form-group">
-      <label for="firstName">First Name *</label>
+      <label for="firstName">Vorname *</label>
       <input
         type="text"
         id="firstName"
@@ -11,12 +11,12 @@
         class="form-control"
         [class.error]="employeeForm.get('firstName')?.invalid && employeeForm.get('firstName')?.touched">
       <div class="error-message" *ngIf="employeeForm.get('firstName')?.invalid && employeeForm.get('firstName')?.touched">
-        First name is required and must be at least 2 characters.
+        Vorname ist erforderlich und muss mindestens 2 Zeichen lang sein.
       </div>
     </div>
 
     <div class="form-group">
-      <label for="lastName">Last Name *</label>
+      <label for="lastName">Nachname *</label>
       <input
         type="text"
         id="lastName"
@@ -24,12 +24,12 @@
         class="form-control"
         [class.error]="employeeForm.get('lastName')?.invalid && employeeForm.get('lastName')?.touched">
       <div class="error-message" *ngIf="employeeForm.get('lastName')?.invalid && employeeForm.get('lastName')?.touched">
-        Last name is required and must be at least 2 characters.
+        Nachname ist erforderlich und muss mindestens 2 Zeichen lang sein.
       </div>
     </div>
 
     <div class="form-group">
-      <label for="street">Street *</label>
+      <label for="street">Straße *</label>
       <input
         type="text"
         id="street"
@@ -37,12 +37,12 @@
         class="form-control"
         [class.error]="employeeForm.get('street')?.invalid && employeeForm.get('street')?.touched">
       <div class="error-message" *ngIf="employeeForm.get('street')?.invalid && employeeForm.get('street')?.touched">
-        Street is required.
+        Straße ist erforderlich.
       </div>
     </div>
 
     <div class="form-group">
-      <label for="postcode">Postcode *</label>
+      <label for="postcode">Postleitzahl *</label>
       <input
         type="text"
         id="postcode"
@@ -50,12 +50,12 @@
         class="form-control"
         [class.error]="employeeForm.get('postcode')?.invalid && employeeForm.get('postcode')?.touched">
       <div class="error-message" *ngIf="employeeForm.get('postcode')?.invalid && employeeForm.get('postcode')?.touched">
-        Postcode is required and must be a 5-digit number.
+        Postleitzahl ist erforderlich und muss eine 5-stellige Zahl sein.
       </div>
     </div>
 
     <div class="form-group">
-      <label for="city">City *</label>
+      <label for="city">Stadt *</label>
       <input
         type="text"
         id="city"
@@ -63,12 +63,12 @@
         class="form-control"
         [class.error]="employeeForm.get('city')?.invalid && employeeForm.get('city')?.touched">
       <div class="error-message" *ngIf="employeeForm.get('city')?.invalid && employeeForm.get('city')?.touched">
-        City is required.
+        Stadt ist erforderlich.
       </div>
     </div>
 
     <div class="form-group">
-      <label for="phone">Phone *</label>
+      <label for="phone">Telefon *</label>
       <input
         type="text"
         id="phone"
@@ -76,27 +76,20 @@
         class="form-control"
         [class.error]="employeeForm.get('phone')?.invalid && employeeForm.get('phone')?.touched">
       <div class="error-message" *ngIf="employeeForm.get('phone')?.invalid && employeeForm.get('phone')?.touched">
-        Phone is required and must be a valid phone number.
+        Telefon ist erforderlich und muss eine gültige Telefonnummer sein.
       </div>
     </div>
 
 
-    <div class="form-group">
-      <label for="qualifications">Qualifications</label>
-      <select id="qualifications" formControlName="qualifications" class="form-control" multiple>
-        <option *ngFor="let q of qualifications" [value]="q.id">{{ q.skill }}</option>
-      </select>
-      <div class="form-text">Hold Ctrl (Windows) or Cmd (Mac) to select multiple qualifications.</div>
-    </div>
 
     <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
     <div class="success-message" *ngIf="successMessage">{{ successMessage }}</div>
 
     <div class="form-actions">
       <button type="submit" class="btn btn-primary" [disabled]="isLoading">
-        {{ isLoading ? 'Saving...' : (isEditMode ? 'Update Employee' : 'Create Employee') }}
+        {{ isLoading ? 'Speichern...' : (isEditMode ? 'Mitarbeiter aktualisieren' : 'Mitarbeiter erstellen') }}
       </button>
-      <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancel</button>
+      <button type="button" class="btn btn-secondary" (click)="onCancel()">Abbrechen</button>
     </div>
   </form>
 </div>

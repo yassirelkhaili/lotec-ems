@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Employee } from '../../types/Employee'; // Fixed: Use the correct path to the Employee type
+import { Employee } from '../../types/Employee';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { EmployeeService } from '../../services/employee.service';
@@ -12,7 +12,7 @@ import { EmployeeService } from '../../services/employee.service';
   styleUrl: './employee-detail.component.css'
 })
 export class EmployeeDetailComponent implements OnInit {
-  employee: Employee | null = null;
+  employee: any = null;
   qualifications: any[] = [];
   isLoading = true;
   errorMessage = '';
@@ -41,9 +41,10 @@ export class EmployeeDetailComponent implements OnInit {
 
   loadEmployee(id: number) {
     this.employeeService.getEmployee(id).subscribe({
-      next: (employee: Employee | null) => {
+      next: (employee: any) => {
         this.employee = employee;
-        this.loadQualifications(id);
+        this.qualifications = employee && employee.skillSet ? employee.skillSet : [];
+        this.isLoading = false;
       },
       error: (error: any) => {
         this.errorMessage = 'Failed to load employee data.';
@@ -53,41 +54,24 @@ export class EmployeeDetailComponent implements OnInit {
     });
   }
 
-  loadQualifications(employeeId: number) {
-    this.employeeService.getEmployeeQualifications(employeeId).subscribe({
-      next: (qualifications: any[]) => {
-        this.qualifications = qualifications;
-        this.isLoading = false;
-      },
-      error: (error: any) => {
-        // Don't overwrite employee error message if it exists
-        if (!this.errorMessage) {
-          this.errorMessage = 'Failed to load qualifications.';
-        }
-        this.isLoading = false;
-        console.error('Error loading qualifications:', error);
-      }
-    });
-  }
-
   onEdit() {
     if (this.employee && this.employee.id) {
-      this.router.navigate(['/employees', this.employee.id, 'edit']);
+      this.router.navigate(['/dashboard/employees', this.employee.id, 'edit']);
     }
   }
 
   onDelete() {
-    if (this.employee && this.employee.id && confirm('Are you sure you want to delete this employee?')) {
-      this.employeeService.deleteEmployee(this.employee.id).subscribe({
-        next: () => {
-          alert('Employee deleted successfully!');
-          this.router.navigate(['/employees']);
-        },
-        error: (error: any) => {
-          this.errorMessage = 'Failed to delete employee.';
-          console.error('Error deleting employee:', error);
-        }
-      });
+    if (this.employee && this.employee.id) {
+      if (confirm('Are you sure you want to delete this employee?')) {
+        this.employeeService.deleteEmployee(this.employee.id).subscribe({
+          next: () => {
+            this.router.navigate(['/employees']);
+          },
+          error: () => {
+            alert('Failed to delete employee.');
+          }
+        });
+      }
     }
   }
 

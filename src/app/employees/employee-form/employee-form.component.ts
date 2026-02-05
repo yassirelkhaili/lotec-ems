@@ -4,6 +4,7 @@ import { EmployeeService } from '../../services/employee.service';
 import { Employee } from '../employee.model';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-employee-form',
@@ -19,24 +20,28 @@ export class EmployeeFormComponent implements OnInit {
   isLoading = false;
   errorMessage = '';
   successMessage = '';
+  // qualifications removed
 
   constructor(
     private fb: FormBuilder,
     private employeeService: EmployeeService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private http: HttpClient
   ) {
-    this.employeeForm = this.fb.group({
-      firstName: ['', [Validators.required, Validators.minLength(2)]],
-      lastName: ['', [Validators.required, Validators.minLength(2)]],
-      street: ['', Validators.required],
-      postcode: ['', [Validators.required, Validators.pattern(/^\d{5}$/)]],
-      city: ['', Validators.required],
-      phone: ['', [Validators.required, Validators.pattern(/^[\+]?[0-9\s\-\(\)]+$/)]]
-    });
+          this.employeeForm = this.fb.group({
+            firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+            lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+            street: ['', Validators.required],
+            postcode: ['', [Validators.required, Validators.pattern(/^\d{5}$/)]],
+            city: ['', Validators.required],
+            phone: ['', [Validators.required, Validators.pattern(/^[\+]?[0-9\s\-\(\)]+$/)]],
+            // qualifications removed
+          });
   }
 
   ngOnInit() {
+    // qualifications fetch removed
     const idParam = this.route.snapshot.params['id'];
     if (idParam) {
       const parsedId = parseInt(idParam, 10);
@@ -69,32 +74,21 @@ export class EmployeeFormComponent implements OnInit {
       this.successMessage = '';
 
 
-      // Create employee object with proper typing
+      // Create employee object with qualifications
       const formValue = this.employeeForm.value;
       let operation;
+      const employee: any = {
+        id: this.isEditMode && this.employeeId ? this.employeeId : 0,
+        firstName: formValue.firstName,
+        lastName: formValue.lastName,
+        street: formValue.street,
+        postcode: formValue.postcode,
+        city: formValue.city,
+        phone: formValue.phone
+      };
       if (this.isEditMode && this.employeeId) {
-        // For update, include the id property as required by Employee type
-        const employee: Employee = {
-          id: this.employeeId,
-          firstName: formValue.firstName,
-          lastName: formValue.lastName,
-          street: formValue.street,
-          postcode: formValue.postcode,
-          city: formValue.city,
-          phone: formValue.phone
-        };
         operation = this.employeeService.updateEmployee(this.employeeId, employee);
       } else {
-        // For create, provide a dummy id (e.g., 0) as required by Employee type
-        const employee: Employee = {
-          id: 0,
-          firstName: formValue.firstName,
-          lastName: formValue.lastName,
-          street: formValue.street,
-          postcode: formValue.postcode,
-          city: formValue.city,
-          phone: formValue.phone
-        };
         operation = this.employeeService.createEmployee(employee);
       }
 

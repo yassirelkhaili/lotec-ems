@@ -4,6 +4,10 @@
   padding: 20px;
 }
 
+h2 {
+  color: white;
+}
+
 .employee-form {
   display: flex;
   flex-direction: column;
