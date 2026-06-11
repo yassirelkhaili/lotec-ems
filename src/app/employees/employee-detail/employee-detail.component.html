@@ -1,61 +1,61 @@
 <div class="employee-detail-container" *ngIf="employee">
   <div class="header">
-    <h2>Employee Details</h2>
+    <h2>Mitarbeiterdetails</h2>
     <div class="actions">
-      <button class="btn btn-primary" (click)="onEdit()">Edit</button>
-      <button class="btn btn-danger" (click)="onDelete()">Delete</button>
-      <button class="btn btn-secondary" (click)="onBack()">Back to List</button>
+      <button class="btn btn-primary" (click)="onEdit()">Bearbeiten</button>
+      <button class="btn btn-danger" (click)="onDelete()">Löschen</button>
+      <button class="btn btn-secondary" (click)="onBack()">Zurück zur Liste</button>
     </div>
   </div>
 
   <div class="employee-info" *ngIf="!isLoading">
     <div class="info-section">
-      <h3>Personal Information</h3>
+      <h3>Persönliche Informationen</h3>
       <div class="info-grid">
         <div class="info-item">
-          <label>First Name:</label>
+          <label>Vorname:</label>
           <span>{{ employee.firstName }}</span>
         </div>
         <div class="info-item">
-          <label>Last Name:</label>
+          <label>Nachname:</label>
           <span>{{ employee.lastName }}</span>
         </div>
         <div class="info-item">
-          <label>Street:</label>
+          <label>Straße:</label>
           <span>{{ employee.street }}</span>
         </div>
         <div class="info-item">
-          <label>Postcode:</label>
+          <label>Postleitzahl:</label>
           <span>{{ employee.postcode }}</span>
         </div>
         <div class="info-item">
-          <label>City:</label>
+          <label>Stadt:</label>
           <span>{{ employee.city }}</span>
         </div>
         <div class="info-item">
-          <label>Phone:</label>
+          <label>Telefon:</label>
           <span>{{ employee.phone }}</span>
         </div>
       </div>
     </div>
 
     <div class="qualifications-section">
-      <h3>Qualifications</h3>
-      <div *ngIf="qualifications.length > 0; else noQualifications">
+      <h3>Qualifikationen</h3>
+      <div *ngIf="employee && employee.skillSet && employee.skillSet.length > 0; else noQualifications">
         <ul class="qualifications-list">
-          <li *ngFor="let qual of qualifications" class="qualification-item">
+          <li *ngFor="let qual of employee.skillSet" class="qualification-item">
             {{ qual.skill }}
           </li>
         </ul>
       </div>
       <ng-template #noQualifications>
-        <p>No qualifications assigned.</p>
+        <p>Keine Qualifikationen zugewiesen.</p>
       </ng-template>
     </div>
   </div>
 
   <div class="loading" *ngIf="isLoading">
-    Loading employee details...
+    Mitarbeiterdetails werden geladen...
   </div>
 
   <div class="error-message" *ngIf="errorMessage">

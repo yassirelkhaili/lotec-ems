@@ -1,3 +1,24 @@
+.employee-actions .btn.btn-primary {
+  background-color: #28a745;
+  border-color: #28a745;
+  color: #fff;
+}
+
+.employee-actions .btn.btn-primary:hover {
+  background-color: #218838;
+  border-color: #218838;
+}
+
+.employee-actions .btn.btn-secondary {
+  background-color: var(--background-secondary);
+  border-color: var(--background-secondary);
+  color: #fff;
+}
+
+.employee-actions .btn.btn-secondary:hover {
+  background-color: var(--background-secondary-hover);
+  border-color: var(--background-secondary-hover);
+}
 .employee-list-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -9,6 +30,10 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+}
+
+.header h2 {
+  color: #fff;
 }
 
 .search-section {
@@ -45,6 +70,17 @@
 .employee-info h3 {
   margin: 0 0 10px 0;
   color: #333;
+}
+/* Override only the Add New Employee button in the header to use orange */
+.header .btn.btn-primary {
+  background-color: var(--background-secondary);
+  border-color: var(--background-secondary);
+  color: #fff;
+}
+
+.header .btn.btn-primary:hover {
+  background-color: var(--background-secondary-hover);
+  border-color: var(--background-secondary-hover);
 }
 
 .employee-info p {
